@@ -1,0 +1,57 @@
+<html>
+<head>
+</head>
+<body>
+<script>
+function mySquareFunction() {
+    // Get user input
+    let myIn01 = parseFloat(document.getElementById('myNum01').value)
+
+    // Decision: check if number is negative
+    if (myIn01 < 0) {
+        document.getElementById('mySpan01').innerHTML = 'Please enter a positive number.'
+        return
+    }
+
+    // Square the number
+    let myAnswer = myIn01 * myIn01
+
+    // Object
+    let resultObject = {
+        inputNumber: myIn01,
+        squaredValue: myAnswer
+    }
+    console.log('Object:', resultObject)
+
+    // Loop
+    let loopOutput = ''
+    for (let i = 1; i <= myIn01; i++) {
+        loopOutput += i + ' '
+    }
+    console.log('Counting up to your number: ' + loopOutput)
+
+    // Array
+    let numArray = []
+    for (let i = 1; i <= myIn01; i++) {
+        numArray.push(i)
+    }
+    console.log('Array of numbers:', numArray)
+
+    // Show result on page
+    document.getElementById('mySpan01').innerHTML = myIn01 + ' squared = ' + myAnswer
+}
+</script>
+
+<h2 align=center>t1a02-video-flac-rielly</h2>
+
+Input: <input id="myNum01" type="number" value="4"><br>
+
+Event: <input type="button" value="myEvent squares" onclick="mySquareFunction()"><br>
+
+Output: <span id="mySpan01">...</span>
+<br>
+<hr>
+<br>
+<h3>Check console to see array, loop, and object</h3>
+</body>
+</html>
