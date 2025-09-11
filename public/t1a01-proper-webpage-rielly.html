@@ -1,1 +1,81 @@
+<html>
+<head>
+    <title>Proper Page</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
 
+        a {
+            color: #0000ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin: 20px 0;
+            text-shadow: 1px 1px 5px rgba(0, 255, 0, 0.7);
+        }
+
+        img {
+            width: 300px;
+            height: auto;
+            margin: 10px;
+            border: 2px solid #000000;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+
+        img:hover {
+            transform: scale(1.05);
+        }
+
+        video {
+            border: 2px solid #000000;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .image-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <a href="https://beegigantic.github.io/game-dev/public/index.html">Back to Index</a>
+
+    <h1>Proper Page by Rielly</h1>
+
+    <div>
+        <img src="Hello.jfif" alt="Hello Image"><br>
+        <img src="QyPZDY0B.png" alt="Another Image">
+    </div>
+
+    <h1>Here are some images of my favourite animals!</h1>
+
+    <div class="image-gallery">
+        <img src="Fox1.jfif" alt="Fox 1">
+        <img src="Turtle1.jfif" alt="Turtle">
+        <img src="Fox2.jfif" alt="Fox 2">
+        <img src="Fox3.jfif" alt="Fox 3">
+        <img src="Fox4.jfif" alt="Fox 4">
+    </div>
+
+    <h1>Here is a video of a fox!</h1>
+
+    <div>
+        <video width="320" height="240" controls>
+            <source src="Fox Dives Headfirst Into Snow _ North America.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+</body>
+</html>
