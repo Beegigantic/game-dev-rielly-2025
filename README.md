@@ -72,10 +72,10 @@ Note: If you have a link to an assignment that has not been marked, put "open" a
 
 <details><summary>Tuesday Sept 16th, 2025</summary>
 
-### Title
-1.
-1.
-1.
+### Video Flac test
+1. I learned everything including code
+1. doing hard test instead of easy one
+1.passion project
 
 </details>
 
