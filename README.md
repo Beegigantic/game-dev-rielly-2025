@@ -17,45 +17,43 @@ Note: If you have a link to an assignment that has not been marked, put "open" a
 <details ><summary>Monday Sept 8th, 2025</summary>
 
 ### Title
-1.
-1.
-1.
+1.Learned peoples names
+1.started setting up my github
 
 </details>
 
 <details ><summary>Tuesday Sept 9th, 2025</summary>
 
 ### Title
-1.
-1.
-1.
+1.Assembly
+1.made an index
 
 </details>
 
 <details><summary>Wed Sept 10th, 2025</summary>
 
 ### Title
-1.
-1.
-1.
+1.Learned peoples names
+1.started my first assignment
+1.made an x assigment
 
 </details>
 
 <details><summary>Thursday Sept 11th, 2025</summary>
 
 ### Title
-1.
-1.
-1.
+1.Learned peoples names
+1.finished my first assignment
+1.made an x assigment
 
 </details>
 
 <details><summary>Friday Sept 12th, 2025</summary>
 
 ### Title
-1.
-1.
-1.
+1.Learned peoples names
+1.made my second assignment
+1.made an x assigment
 
 </details>
 
@@ -64,9 +62,9 @@ Note: If you have a link to an assignment that has not been marked, put "open" a
 <details ><summary>Monday Sept 15th, 2025</summary>
 
 ### Title
-1.
-1.
-1.
+1.Learned peoples names
+1.made my third assignment
+1.made an x assigment
 
 </details>
 
