@@ -1,0 +1,1343 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gem Collector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #main-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            background-color: #161b22;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            min-height: 80vh;
+            overflow: hidden;
+        }
+        
+        #nav-tabs {
+            background-color: #010409;
+            width: 250px;
+            min-width: 200px;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: #c9d1d9;
+        }
+        
+        .tab-button:hover {
+            background-color: #21262d;
+        }
+
+        .tab-button.active {
+            background-color: #21262d;
+            color: #58a6ff;
+            font-weight: bold;
+        }
+
+        #content-container {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tab-content {
+            width: 100%;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #gem-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #58a6ff;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 8px rgba(88, 166, 255, 0.5);
+        }
+        
+        #gem-button {
+            cursor: pointer;
+            transition: transform 0.1s ease-in-out;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+        
+        #gem-button:active {
+            transform: scale(0.95);
+        }
+
+        #gem-svg {
+            width: 150px;
+            height: 150px;
+            filter: drop-shadow(0 0 10px #58a6ff);
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            color: #58a6ff;
+            animation: float-up 1s forwards;
+            pointer-events: none;
+            text-shadow: 0 0 5px rgba(88, 166, 255, 0.5);
+            z-index: 10;
+        }
+
+        @keyframes float-up {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+
+        #upgrades-container, #shop-container, #achievements-container {
+            width: 100%;
+        }
+        
+        .upgrade-item, .shop-item, .achievement-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #21262d;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .upgrade-item:hover, .shop-item:hover {
+            background-color: #30363d;
+        }
+        
+        .upgrade-item.disabled, .shop-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upgrade-info h3, .shop-info h3, .achievement-info h3 {
+            font-weight: bold;
+            font-size: 1.25rem;
+        }
+        
+        .upgrade-info p, .shop-info p, .achievement-info p {
+            font-size: 0.875rem;
+            color: #8b949e;
+        }
+
+        .upgrade-cost, .shop-cost {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+        
+        .shop-cost.rebirth {
+            color: #f7a226;
+        }
+
+        .shop-cost.prestige {
+            color: #a270f5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        .action-buttons button {
+            flex: 1;
+            padding: 1rem;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+        }
+
+        .action-buttons button.rebirth {
+            background-color: #f7a226;
+            color: #161b22;
+        }
+
+        .action-buttons button.prestige {
+            background-color: #a270f5;
+            color: #161b22;
+        }
+        
+        .action-buttons button.dev {
+            background-color: #38a169;
+            color: #161b22;
+        }
+
+        .action-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pet-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+            background-color: #21262d;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: #161b22;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            transform: scale(0.8);
+            transition: transform 0.3s ease-in-out;
+            max-width: 90%;
+            width: 400px;
+        }
+
+        .modal.open .modal-content {
+            transform: scale(1);
+        }
+
+        .rare-animation {
+            animation: glow-pulse 1.5s infinite alternate;
+        }
+
+        @keyframes glow-pulse {
+            from { box-shadow: 0 0 10px #f7a226, 0 0 20px #f7a226; }
+            to { box-shadow: 0 0 20px #a270f5, 0 0 40px #a270f5; }
+        }
+
+        .egg-item-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .egg-item-content .shop-info {
+            flex-grow: 1;
+        }
+
+        .egg-item-content .egg-info-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+
+        .achievement-item.completed {
+            background-color: #2a3a2a;
+        }
+        
+        .achievement-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .achievement-claim-btn {
+            padding: 0.5rem 1rem;
+            background-color: #22c55e;
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s ease-in-out;
+        }
+        
+        .achievement-claim-btn:hover {
+            background-color: #16a34a;
+        }
+
+        #boss-gem-container {
+            position: relative;
+            margin-top: 2rem;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #boss-gem-hp-bar {
+            width: 200px;
+            height: 20px;
+            background-color: #555;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        #boss-gem-hp-fill {
+            height: 100%;
+            background-color: #e3342f;
+            width: 100%;
+            transition: width 0.3s ease-in-out;
+        }
+
+        #boss-gem-timer, #boss-spawn-timer {
+            font-weight: bold;
+            color: #e3342f;
+        }
+
+        #boss-gem {
+            cursor: pointer;
+            transition: transform 0.1s ease-in-out;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+        
+        #boss-gem.mega {
+            animation: mega-boss-glow 1s infinite alternate;
+        }
+
+        @keyframes mega-boss-glow {
+            from { filter: drop-shadow(0 0 10px #e3342f); }
+            to { filter: drop-shadow(0 0 20px #ff00ff) drop-shadow(0 0 40px #ff00ff); }
+        }
+
+        #boss-gem-svg {
+            width: 200px;
+            height: 200px;
+            filter: drop-shadow(0 0 10px #e3342f);
+        }
+
+        /* Styles for customization items */
+        .color-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s ease-in-out;
+        }
+
+        .color-circle:hover {
+            border-color: #c9d1d9;
+        }
+
+        .color-circle.selected {
+            border-color: #58a6ff;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="text-4xl font-bold text-white mb-4">Gem Collector</h1>
+    
+    <div id="main-container">
+        <!-- Navigation Tabs -->
+        <nav id="nav-tabs">
+            <button class="tab-button active" data-target="gem-tab">Gem</button>
+            <button class="tab-button" data-target="upgrades-tab">Upgrades</button>
+            <button class="tab-button" data-target="shop-tab">Shop</button>
+            <button class="tab-button" data-target="achievements-tab">Achievements</button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div id="content-container">
+            <!-- Gem Tab Content -->
+            <div id="gem-tab" class="tab-content active">
+                <div id="gem-display">0 Gems</div>
+                <p id="boss-spawn-timer" class="mb-4 text-green-400 font-bold"></p>
+                
+                <button id="gem-button">
+                    <svg id="gem-svg" viewBox="0 0 24 24" fill="currentColor" stroke="#c9d1d9" stroke-width="1.5">
+                        <path d="M12 2L2 9l10 13 10-13-10-7zm0 18.5L4.5 9.5l7.5-5.25v14.25z"/>
+                    </svg>
+                </button>
+                
+                <div id="boss-gem-container">
+                    <h2 id="boss-gem-title" class="text-xl font-bold mb-2 text-red-400">Boss Gem!</h2>
+                    <div id="boss-gem-hp-bar">
+                        <div id="boss-gem-hp-fill"></div>
+                    </div>
+                    <p id="boss-gem-timer" class="mb-2"></p>
+                    <button id="boss-gem">
+                        <svg id="boss-gem-svg" viewBox="0 0 24 24" fill="currentColor" stroke="#c9d1d9" stroke-width="1.5">
+                            <path d="M12 2L2 9l10 13 10-13-10-7zm0 18.5L4.5 9.5l7.5-5.25v14.25z"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="pet-display">
+                    <svg id="pet-svg" class="hidden w-8 h-8 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 15v-4h2v4h-2zm1 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-6a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm1-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                    <span id="pet-status">No Pet Unlocked</span>
+                </div>
+            </div>
+
+            <!-- Upgrades Tab Content -->
+            <div id="upgrades-tab" class="tab-content">
+                <h2 class="text-2xl font-bold text-white mb-4 text-center">Upgrades</h2>
+                <div id="upgrades-container" class="grid grid-cols-1 gap-4">
+                    <!-- Upgrades will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Shop Tab Content -->
+            <div id="shop-tab" class="tab-content">
+                <h2 class="text-2xl font-bold text-white mb-4 text-center">Shops</h2>
+                <h3 class="text-xl font-bold text-white mt-4 mb-4 text-center">Rebirth Shop (<span id="rebirth-points-display">0</span> Points)</h3>
+                <div id="rebirth-shop" class="grid grid-cols-1 gap-4 w-full"></div>
+
+                <h3 class="text-xl font-bold text-white mt-8 mb-4 text-center">Prestige Shop (<span id="prestige-points-display">0</span> Points)</h3>
+                <div id="prestige-shop" class="grid grid-cols-1 gap-4 w-full"></div>
+                
+                <h3 class="text-xl font-bold text-white mt-8 mb-4 text-center">Customization Shop</h3>
+                <div id="customization-shop" class="flex justify-center gap-4 p-4 rounded-lg bg-gray-800 w-full">
+                    <div id="color-red" class="color-circle bg-red-500" data-color="#ef4444" data-floating-color="#f87171" data-cost="500"></div>
+                    <div id="color-green" class="color-circle bg-green-500" data-color="#22c55e" data-floating-color="#4ade80" data-cost="500"></div>
+                    <div id="color-purple" class="color-circle bg-purple-500" data-color="#a855f7" data-floating-color="#c084fc" data-cost="500"></div>
+                </div>
+
+                <h3 class="text-xl font-bold text-white mt-8 mb-4 text-center">Egg Hatchery</h3>
+                <div id="egg-hatchery" class="grid grid-cols-1 gap-4 w-full"></div>
+            </div>
+
+            <!-- Achievements Tab Content -->
+            <div id="achievements-tab" class="tab-content">
+                <h2 class="text-2xl font-bold text-white mb-4 text-center">Achievements</h2>
+                <div id="achievement-list" class="grid grid-cols-1 gap-4 w-full"></div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="rebirth-btn" class="rebirth">
+                    Rebirth (<span id="rebirth-count">0</span>)<br>
+                    Cost: <span id="rebirth-cost">10000</span> Gems
+                </button>
+                <button id="prestige-btn" class="prestige" disabled>
+                    Prestige (<span id="prestige-count">0</span>)<br>
+                    Cost: <span id="prestige-cost">5</span> Rebirths
+                </button>
+            </div>
+            <div class="action-buttons mt-4">
+                 <button id="dev-btn" class="dev">
+                    Dev Button
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pet Hatch Modal -->
+    <div id="pet-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-3xl font-bold text-white">Congratulations!</h3>
+            <p class="text-lg text-gray-400 mt-2">You hatched a new pet:</p>
+            <h2 id="hatched-pet-name" class="text-4xl font-bold mt-4 text-blue-400"></h2>
+            <p id="hatched-pet-bonus" class="text-lg text-gray-500 mt-2"></p>
+            <p id="pet-equip-status" class="text-sm mt-2"></p>
+            <button id="modal-close-btn" class="mt-8 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors">
+                Awesome!
+            </button>
+        </div>
+    </div>
+
+    <!-- Egg Info Modal -->
+    <div id="egg-info-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-white mb-4">Pets in Egg</h3>
+            <ul id="egg-pet-list" class="text-left text-gray-300 space-y-2">
+            </ul>
+            <button id="egg-modal-close-btn" class="mt-8 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+    
+    <!-- Dev Button Modal -->
+    <div id="dev-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-3xl font-bold text-white mb-4">Are you sure?</h3>
+            <p class="text-lg text-gray-400 mb-6">Using this button will grant you an achievement that can only be obtained this way. However, it will take away the challenge of the game.</p>
+            <div class="flex gap-4 justify-center">
+                <button id="dev-modal-yes" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors">
+                    Yes, I am sure
+                </button>
+                <button id="dev-modal-no" class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors">
+                    No, take me back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let gems = 0;
+            let gemsPerClick = 1;
+            let gemsPerSecond = 0;
+            let rebirths = 0;
+            let prestige = 0;
+            let rebirthPoints = 0;
+            let prestigePoints = 0;
+            let totalClicks = 0;
+            let attemptedRebirths = 0;
+            let devButtonUsed = false;
+            let devButtonClicks = 0; // New state variable
+            let petsHatched = 0;
+            let hatchedLegendary = false;
+            let lostAllGemsToBoss = false;
+            
+            // Base costs
+            let rebirthCost = 10000;
+            let prestigeCostRebirths = 5;
+
+            // Bonuses from shops
+            let totalClickBonus = 0;
+            let totalAutoBonus = 0;
+            let prestigeGemMultiplier = 1;
+            let rebirthPointBonus = 0;
+
+            // Pet System
+            let ownedPets = [];
+            let petBonus = 1;
+            let petName = 'None';
+            let petRarity = 'None';
+
+            // Boss Gem
+            let bossGem = null;
+            let isBossActive = false;
+            let bossHp = 0;
+            let bossMaxHp = 0;
+            let bossReward = 0;
+            let bossTimer = 0;
+            const BOSS_GEM_DURATION = 30000; // 30 seconds
+            const BOSS_SPAWN_INTERVAL = 60000; // 60 seconds
+            let bossCountdown = BOSS_SPAWN_INTERVAL;
+            let isMegaBoss = false;
+
+            // Customization
+            let gemColor = '#c9d1d9';
+            let floatingTextColor = '#58a6ff';
+
+            // Upgrades can now be purchased multiple times. The cost increases with each purchase.
+            let upgrades = [
+                { id: 'clicker-upgrade-1', name: 'Better Pickaxe', baseCost: 50, cost: 50, effect: 1, type: 'click', count: 0 },
+                { id: 'auto-clicker-upgrade-1', name: 'Mining Bot', baseCost: 100, cost: 100, effect: 5, type: 'auto', count: 0 },
+                { id: 'clicker-upgrade-2', name: 'Gem Drill', baseCost: 500, cost: 500, effect: 10, type: 'click', count: 0 },
+                { id: 'auto-clicker-upgrade-2', name: 'Mining Factory', baseCost: 1000, cost: 1000, effect: 25, type: 'auto', count: 0 },
+                { id: 'clicker-upgrade-3', name: 'Quantum Core Pickaxe', baseCost: 5000, cost: 5000, effect: 50, type: 'click', count: 0 },
+                { id: 'auto-clicker-upgrade-3', name: 'Automated Mine', baseCost: 10000, cost: 10000, effect: 100, type: 'auto', count: 0 },
+                { id: 'clicker-upgrade-4', name: 'Singularity Drill', baseCost: 50000, cost: 50000, effect: 500, type: 'click', count: 0 },
+                { id: 'auto-clicker-upgrade-4', name: 'Galactic Mining Fleet', baseCost: 100000, cost: 100000, effect: 1000, type: 'auto', count: 0 }
+            ];
+            
+            // Rebirth and Prestige items can now be tiered or one-time purchases
+            let rebirthShopItems = [
+                { id: 'rebirth-click-bonus', name: 'Rebirth Clicker', baseCost: 1, cost: 1, bonus: { type: 'click', value: 50 }, description: 'Adds +50 to base gems per click', type: 'one-time', bought: false },
+                { id: 'rebirth-auto-bonus', name: 'Rebirth Automator', baseCost: 2, cost: 2, bonus: { type: 'auto', value: 100 }, description: 'Adds +100 to base gems per second', type: 'one-time', bought: false },
+                { id: 'rebirth-multiplier', name: 'Rebirth Multiplier', baseCost: 5, cost: 5, bonus: { type: 'multiplier', value: 1.1 }, description: 'Multiplies all gem production by 1.1x', type: 'tiered', count: 0 },
+                { id: 'rebirth-gem-boost', name: 'Rebirth Gem Boost', baseCost: 10, cost: 10, bonus: { type: 'rebirthBoost', value: 100 }, description: 'Adds +100 to gems per click for each rebirth', type: 'one-time', bought: false }
+            ];
+
+            const eggHatcheryItems = [
+                {
+                    id: 'common-egg', name: 'Common Egg', cost: 5, costType: 'rebirth', description: 'Hatch a common pet.',
+                    petPool: [
+                        {name: 'Slime', bonus: 1.1, rarity: 'Common', chance: 50},
+                        {name: 'Slime-King', bonus: 1.15, rarity: 'Common', chance: 30},
+                        {name: 'Rock Golem', bonus: 1.25, rarity: 'Common', chance: 14},
+                        {name: 'Stone Giant', bonus: 1.35, rarity: 'Uncommon', chance: 5},
+                        {name: 'Emberling', bonus: 1.45, rarity: 'Rare', chance: 1}
+                    ]
+                },
+                {
+                    id: 'uncommon-egg', name: 'Uncommon Egg', cost: 10, costType: 'rebirth', description: 'Hatch an uncommon pet.',
+                    petPool: [
+                        {name: 'Stone Giant', bonus: 1.35, rarity: 'Uncommon', chance: 50},
+                        {name: 'Tidal Spirit', bonus: 1.4, rarity: 'Uncommon', chance: 30},
+                        {name: 'Thunderbolt Wyrm', bonus: 1.45, rarity: 'Uncommon', chance: 14},
+                        {name: 'Volcanic Drake', bonus: 1.6, rarity: 'Rare', chance: 5},
+                        {name: 'Primal Elemental', bonus: 1.75, rarity: 'Legendary', chance: 1}
+                    ]
+                },
+                {
+                    id: 'rare-egg', name: 'Rare Egg', cost: 25, costType: 'rebirth', description: 'Hatch a rare pet.',
+                    petPool: [
+                        {name: 'Elementalist', bonus: 1.5, rarity: 'Rare', chance: 50},
+                        {name: 'Primal Elemental', bonus: 1.6, rarity: 'Rare', chance: 30},
+                        {name: 'Shadow Wraith', bonus: 1.7, rarity: 'Rare', chance: 14},
+                        {name: 'Dragon', bonus: 2.0, rarity: 'Legendary', chance: 5},
+                        {name: 'Eldritch Dragon', bonus: 2.5, rarity: 'Legendary', chance: 1}
+                    ]
+                },
+                {
+                    id: 'legendary-egg', name: 'Legendary Egg', cost: 5, costType: 'prestige', description: 'Hatch a legendary pet.',
+                    petPool: [
+                        {name: 'Eldritch Dragon', bonus: 2.5, rarity: 'Legendary', chance: 50},
+                        {name: 'Cosmic Dragon', bonus: 3.0, rarity: 'Legendary', chance: 30},
+                        {name: 'Ancient Dragon', bonus: 3.5, rarity: 'Legendary', chance: 14},
+                        {name: 'Timeless Dragon', bonus: 4.0, rarity: 'Mythic', chance: 5},
+                        {name: 'Void Serpent', bonus: 5.0, rarity: 'Mythic', chance: 1}
+                    ]
+                },
+            ];
+
+            let prestigeShopItems = [
+                { id: 'prestige-click-bonus', name: 'Prestige Clicker', baseCost: 1, cost: 1, bonus: { type: 'click', value: 500 }, description: 'Adds +500 to base gems per click', type: 'one-time', bought: false },
+                { id: 'prestige-auto-bonus', name: 'Prestige Automator', baseCost: 2, cost: 2, bonus: { type: 'auto', value: 1000 }, description: 'Adds +1000 to base gems per second', type: 'one-time', bought: false },
+                { id: 'prestige-gem-multiplier', name: 'Prestige Gem Multiplier', baseCost: 5, cost: 5, bonus: { type: 'gemMultiplier', value: 1.5 }, description: 'Multiplies all gem production by 1.5x', type: 'one-time', bought: false },
+                { id: 'rebirth-point-booster', name: 'Rebirth Point Booster', baseCost: 10, cost: 10, bonus: { type: 'rebirthPointBonus', value: 1 }, description: 'Gain 1 extra rebirth point per rebirth', type: 'one-time', bought: false },
+            ];
+            
+            let achievements = [
+                { id: 'achievement-1', name: 'First Click', description: 'Click the gem for the first time.', condition: () => totalClicks >= 1, reward: { type: 'gems', value: 100 }, completed: false, claimed: false },
+                { id: 'achievement-2', name: 'Clicker', description: 'Click the gem 1,000 times.', condition: () => totalClicks >= 1000, reward: { type: 'gems', value: 5000 }, completed: false, claimed: false },
+                { id: 'achievement-3', name: 'Gemillionaire', description: 'Reach 1,000,000 gems.', condition: () => gems >= 1000000, reward: { type: 'gems', value: 100000 }, completed: false, claimed: false },
+                { id: 'achievement-4', name: 'First Rebirth', description: 'Perform your first rebirth.', condition: () => rebirths >= 1, reward: { type: 'rebirthPoints', value: 1 }, completed: false, claimed: false },
+                { id: 'achievement-5', name: 'First Prestige', description: 'Perform your first prestige.', condition: () => prestige >= 1, reward: { type: 'prestigePoints', value: 1 }, completed: false, claimed: false },
+                { id: 'achievement-6', name: 'A Little Bit More', description: 'Click the gem 10,000 times.', condition: () => totalClicks >= 10000, reward: { type: 'gems', value: 50000 }, completed: false, claimed: false },
+                { id: 'achievement-7', name: 'Finger Endurance', description: 'Click the gem 100,000 times.', condition: () => totalClicks >= 100000, reward: { type: 'gems', value: 500000 }, completed: false, claimed: false },
+                { id: 'achievement-8', name: 'Rich!', description: 'Reach 10,000,000 gems.', condition: () => gems >= 10000000, reward: { type: 'gems', value: 1000000 }, completed: false, claimed: false },
+                { id: 'achievement-9', name: 'Obscenely Rich!', description: 'Reach 1,000,000,000 gems.', condition: () => gems >= 1000000000, reward: { type: 'gems', value: 10000000 }, completed: false, claimed: false },
+                { id: 'achievement-10', name: 'Rebirth Addict', description: 'Rebirth 10 times.', condition: () => rebirths >= 10, reward: { type: 'rebirthPoints', value: 5 }, completed: false, claimed: false },
+                { id: 'achievement-11', name: 'Prestige Master', description: 'Prestige 5 times.', condition: () => prestige >= 5, reward: { type: 'prestigePoints', value: 5 }, completed: false, claimed: false },
+                { id: 'achievement-12', name: 'Almost', description: 'Try to rebirth without enough gems.', condition: () => attemptedRebirths >= 1, reward: { type: 'gems', value: 1000 }, completed: false, claimed: false },
+                { id: 'achievement-13', name: 'The Cheater', description: 'Use the dev button.', condition: () => devButtonUsed, reward: { type: 'gems', value: 1 }, completed: false, claimed: false },
+                { id: 'achievement-14', name: 'Pet Collector', description: 'Hatch 5 pets.', condition: () => petsHatched >= 5, reward: { type: 'rebirthPoints', value: 1 }, completed: false, claimed: false },
+                { id: 'achievement-15', name: 'Mythical Friend', description: 'Hatch a Legendary or Mythical pet.', condition: () => hatchedLegendary, reward: { type: 'prestigePoints', value: 1 }, completed: false, claimed: false },
+                { id: 'achievement-16', name: 'Mega Slayer', description: 'Defeat a Mega Boss.', condition: () => isMegaBoss, reward: { type: 'prestigePoints', value: 2 }, completed: false, claimed: false },
+                { id: 'achievement-17', name: 'Oops', description: 'Lose all gems during a boss fight.', condition: () => lostAllGemsToBoss, reward: { type: 'gems', value: 50000 }, completed: false, claimed: false },
+                { id: 'achievement-18', name: 'The Completionist', description: 'Unlock all other achievements.', condition: () => achievements.slice(0, 17).every(a => a.completed), reward: { type: 'prestigePoints', value: 10 }, completed: false, claimed: false }
+            ];
+
+            const gemDisplay = document.getElementById('gem-display');
+            const gemButton = document.getElementById('gem-button');
+            const upgradesContainer = document.getElementById('upgrades-container');
+            const rebirthShopContainer = document.getElementById('rebirth-shop');
+            const prestigeShopContainer = document.getElementById('prestige-shop');
+            const eggHatcheryContainer = document.getElementById('egg-hatchery');
+            const rebirthBtn = document.getElementById('rebirth-btn');
+            const prestigeBtn = document.getElementById('prestige-btn');
+            const devBtn = document.getElementById('dev-btn');
+            const rebirthPointsDisplay = document.getElementById('rebirth-points-display');
+            const prestigePointsDisplay = document.getElementById('prestige-points-display');
+            const rebirthCostDisplay = document.getElementById('rebirth-cost');
+            const prestigeCostDisplay = document.getElementById('prestige-cost');
+            const petStatus = document.getElementById('pet-status');
+            const petSvg = document.getElementById('pet-svg');
+            const petModal = document.getElementById('pet-modal');
+            const hatchedPetName = document.getElementById('hatched-pet-name');
+            const hatchedPetBonus = document.getElementById('hatched-pet-bonus');
+            const petEquipStatus = document.getElementById('pet-equip-status');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const eggInfoModal = document.getElementById('egg-info-modal');
+            const eggPetList = document.getElementById('egg-pet-list');
+            const eggModalCloseBtn = document.getElementById('egg-modal-close-btn');
+            const achievementList = document.getElementById('achievement-list');
+            const gemSvg = document.getElementById('gem-svg');
+            const bossGemContainer = document.getElementById('boss-gem-container');
+            const bossGemTitle = document.getElementById('boss-gem-title');
+            const bossGemHpFill = document.getElementById('boss-gem-hp-fill');
+            const bossGemTimerDisplay = document.getElementById('boss-gem-timer');
+            const bossSpawnTimerDisplay = document.getElementById('boss-spawn-timer');
+            const bossGemButton = document.getElementById('boss-gem');
+            const customizationShop = document.getElementById('customization-shop');
+            const navButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const devModal = document.getElementById('dev-modal');
+            const devModalYesBtn = document.getElementById('dev-modal-yes');
+            const devModalNoBtn = document.getElementById('dev-modal-no');
+
+
+            // Initial base upgrades for resetting the game
+            const baseUpgrades = JSON.parse(JSON.stringify(upgrades));
+            const baseRebirthShopItems = JSON.parse(JSON.stringify(rebirthShopItems));
+            const basePrestigeShopItems = JSON.parse(JSON.stringify(prestigeShopItems));
+
+            function updateDisplay() {
+                const rebirthBoost = rebirths * rebirthShopItems.find(item => item.id === 'rebirth-gem-boost').bonus.value;
+                const totalClickBonusFromShops = totalClickBonus + rebirthBoost;
+                const totalAutoBonusFromShops = totalAutoBonus;
+
+                const totalGemsPerClick = (gemsPerClick + totalClickBonusFromShops) * petBonus * prestigeGemMultiplier;
+                const totalGemsPerSecond = (gemsPerSecond + totalAutoBonusFromShops) * petBonus * prestigeGemMultiplier;
+
+                gemDisplay.textContent = `${Math.floor(gems)} Gems`;
+                rebirthPointsDisplay.textContent = rebirthPoints;
+                prestigePointsDisplay.textContent = prestigePoints;
+                rebirthCostDisplay.textContent = rebirthCost;
+                prestigeCostDisplay.textContent = prestigeCostRebirths;
+                
+                const rebirthsToGain = Math.floor(gems / rebirthCost) + rebirthPointBonus;
+                rebirthBtn.disabled = rebirthsToGain < 1;
+                rebirthBtn.textContent = `Rebirth (+${rebirthsToGain} RP)\nCost: ${rebirthCost} Gems`;
+
+                const prestigesToGain = Math.floor(rebirths / prestigeCostRebirths);
+                prestigeBtn.disabled = prestigesToGain < 1;
+                prestigeBtn.textContent = `Prestige (+${prestigesToGain} PP)\nCost: ${prestigeCostRebirths} Rebirths`;
+
+                if (petName !== 'None') {
+                    petStatus.textContent = `Pet: ${petName} (${(petBonus-1)*100}% bonus)`;
+                    petSvg.classList.remove('hidden');
+                } else {
+                    petStatus.textContent = 'No Pet Unlocked';
+                    petSvg.classList.add('hidden');
+                }
+
+                upgrades.forEach(upgrade => {
+                    const upgradeElement = document.getElementById(upgrade.id);
+                    if (upgradeElement) {
+                        const costElement = upgradeElement.querySelector('.upgrade-cost');
+                        costElement.textContent = `${Math.floor(upgrade.cost)} Gems`;
+                        if (gems < upgrade.cost) {
+                            upgradeElement.classList.add('disabled');
+                        } else {
+                            upgradeElement.classList.remove('disabled');
+                        }
+                    }
+                });
+                
+                rebirthShopItems.forEach(item => {
+                    const itemElement = document.getElementById(item.id);
+                    if (itemElement) {
+                         if (rebirthPoints < item.cost || (item.type === 'one-time' && item.bought)) {
+                            itemElement.classList.add('disabled');
+                        } else {
+                            itemElement.classList.remove('disabled');
+                        }
+                    }
+                });
+
+                prestigeShopItems.forEach(item => {
+                    const itemElement = document.getElementById(item.id);
+                    if (itemElement) {
+                        if (prestigePoints < item.cost || item.bought) {
+                            itemElement.classList.add('disabled');
+                        } else {
+                            itemElement.classList.remove('disabled');
+                        }
+                    }
+                });
+
+                eggHatcheryItems.forEach(item => {
+                    const itemElement = document.getElementById(item.id);
+                    if (itemElement) {
+                        let canAfford = false;
+                        if (item.costType === 'rebirth') {
+                            canAfford = rebirthPoints >= item.cost;
+                            const costElement = itemElement.querySelector('.shop-cost');
+                            costElement.textContent = `${item.cost} RP`;
+                            costElement.classList.add('rebirth');
+                            costElement.classList.remove('prestige');
+                        } else {
+                            canAfford = prestigePoints >= item.cost;
+                            const costElement = itemElement.querySelector('.shop-cost');
+                            costElement.textContent = `${item.cost} PP`;
+                            costElement.classList.add('prestige');
+                            costElement.classList.remove('rebirth');
+                        }
+
+                        if (!canAfford) {
+                            itemElement.classList.add('disabled');
+                        } else {
+                            itemElement.classList.remove('disabled');
+                        }
+                    }
+                });
+                
+                // Update Boss Gem display
+                if (isBossActive) {
+                    const hpPercentage = (bossHp / bossMaxHp) * 100;
+                    bossGemHpFill.style.width = `${hpPercentage}%`;
+                    bossGemTimerDisplay.textContent = `Time left: ${Math.max(0, Math.floor(bossTimer / 1000))}s`;
+                    bossSpawnTimerDisplay.style.display = 'none';
+                } else {
+                    const countdownSeconds = Math.max(0, Math.floor(bossCountdown / 1000));
+                    bossSpawnTimerDisplay.textContent = `Next boss in ${countdownSeconds}s`;
+                    bossSpawnTimerDisplay.style.display = 'block';
+                }
+
+                // Update gem and floating text colors
+                document.documentElement.style.setProperty('--gem-color', gemColor);
+                document.documentElement.style.setProperty('--floating-text-color', floatingTextColor);
+                
+                // Update customization shop selection
+                customizationShop.querySelectorAll('.color-circle').forEach(circle => {
+                    if (circle.getAttribute('data-color') === gemColor) {
+                        circle.classList.add('selected');
+                    } else {
+                        circle.classList.remove('selected');
+                    }
+                });
+            }
+
+            function createUpgrades() {
+                upgradesContainer.innerHTML = ''; // Clear existing upgrades
+                upgrades.forEach(upgrade => {
+                    const upgradeItem = document.createElement('div');
+                    upgradeItem.id = upgrade.id;
+                    upgradeItem.classList.add('upgrade-item', 'rounded-lg', 'shadow-md', 'p-4', 'flex', 'justify-between', 'items-center', 'cursor-pointer');
+                    
+                    upgradeItem.innerHTML = `
+                        <div class="upgrade-info">
+                            <h3 class="text-xl font-bold">${upgrade.name} (x${upgrade.count})</h3>
+                            <p class="text-sm text-gray-400">
+                                ${upgrade.type === 'click' ? `Increases gems per click by ${upgrade.effect}` : `Generates ${upgrade.effect} gems/sec`}
+                            </p>
+                        </div>
+                        <div class="upgrade-cost text-xl font-bold text-blue-400">${Math.floor(upgrade.cost)} Gems</div>
+                    `;
+
+                    upgradeItem.addEventListener('click', () => {
+                        if (gems >= upgrade.cost) {
+                            gems -= upgrade.cost;
+                            if (upgrade.type === 'click') {
+                                gemsPerClick += upgrade.effect;
+                            } else {
+                                gemsPerSecond += upgrade.effect;
+                            }
+                            // Increase purchase count and cost
+                            upgrade.count++;
+                            upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.count));
+                            updateDisplay();
+                            createUpgrades(); // Re-render to show new count and cost
+                        }
+                    });
+                    upgradesContainer.appendChild(upgradeItem);
+                });
+            }
+
+            function createShops() {
+                rebirthShopContainer.innerHTML = '';
+                prestigeShopContainer.innerHTML = '';
+                eggHatcheryContainer.innerHTML = '';
+
+                rebirthShopItems.forEach(item => {
+                    const shopItem = document.createElement('div');
+                    shopItem.id = item.id;
+                    shopItem.classList.add('shop-item', 'rounded-lg', 'shadow-md', 'p-4', 'flex', 'justify-between', 'items-center', 'cursor-pointer');
+                    
+                    let itemName = item.name;
+                    if (item.type === 'tiered') {
+                        itemName += ` (Tier ${item.count})`;
+                    }
+
+                    shopItem.innerHTML = `
+                        <div class="shop-info">
+                            <h3 class="text-xl font-bold">${itemName}</h3>
+                            <p class="text-sm text-gray-400">${item.description}</p>
+                        </div>
+                        <div class="shop-cost text-xl font-bold rebirth">${item.cost} RP</div>
+                    `;
+
+                    shopItem.addEventListener('click', () => {
+                        if (rebirthPoints >= item.cost && (item.type === 'tiered' || !item.bought)) {
+                            rebirthPoints -= item.cost;
+                            if (item.bonus.type === 'click') {
+                                totalClickBonus += item.bonus.value;
+                            } else if (item.bonus.type === 'auto') {
+                                totalAutoBonus += item.bonus.value;
+                            } else if (item.bonus.type === 'multiplier') {
+                                item.count++;
+                                item.cost = Math.floor(item.baseCost * Math.pow(1.5, item.count));
+                                gemsPerClick *= item.bonus.value;
+                                gemsPerSecond *= item.bonus.value;
+                            } else if (item.bonus.type === 'rebirthBoost') {
+                                // This is handled in the `updateDisplay` function
+                            }
+                            if (item.type === 'one-time') {
+                                item.bought = true;
+                            }
+                            updateDisplay();
+                            createShops();
+                        }
+                    });
+                    rebirthShopContainer.appendChild(shopItem);
+                });
+
+                prestigeShopItems.forEach(item => {
+                    const shopItem = document.createElement('div');
+                    shopItem.id = item.id;
+                    shopItem.classList.add('shop-item', 'rounded-lg', 'shadow-md', 'p-4', 'flex', 'justify-between', 'items-center', 'cursor-pointer');
+                    
+                    shopItem.innerHTML = `
+                        <div class="shop-info">
+                            <h3 class="text-xl font-bold">${item.name}</h3>
+                            <p class="text-sm text-gray-400">${item.description}</p>
+                        </div>
+                        <div class="shop-cost text-xl font-bold prestige">${item.cost} PP</div>
+                    `;
+
+                    shopItem.addEventListener('click', () => {
+                        if (prestigePoints >= item.cost && !item.bought) {
+                            prestigePoints -= item.cost;
+                            if (item.bonus.type === 'click') {
+                                totalClickBonus += item.bonus.value;
+                            } else if (item.bonus.type === 'auto') {
+                                totalAutoBonus += item.bonus.value;
+                            } else if (item.bonus.type === 'gemMultiplier') {
+                                prestigeGemMultiplier *= item.bonus.value;
+                            } else if (item.bonus.type === 'rebirthPointBonus') {
+                                rebirthPointBonus += item.bonus.value;
+                            }
+                            item.bought = true;
+                            updateDisplay();
+                            createShops();
+                        }
+                    });
+                    prestigeShopContainer.appendChild(shopItem);
+                });
+                
+                eggHatcheryItems.forEach(egg => {
+                    const eggItem = document.createElement('div');
+                    eggItem.id = egg.id;
+                    eggItem.classList.add('shop-item', 'rounded-lg', 'shadow-md', 'p-4', 'flex', 'justify-between', 'items-center', 'cursor-pointer');
+                    
+                    const costDisplayClass = egg.costType === 'rebirth' ? 'rebirth' : 'prestige';
+                    
+                    eggItem.innerHTML = `
+                        <div class="egg-item-content">
+                            <div class="shop-info">
+                                <h3 class="text-xl font-bold">${egg.name}</h3>
+                                <p class="text-sm text-gray-400">${egg.description}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <button class="egg-info-btn text-blue-400 hover:text-blue-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25 2.25 2.25m-2.25-2.25 2.25-2.25m-2.25 2.25L9 15m3-6 3-3m0 0-3-3m3 3L18 6m-3-3-3 3-3-3m3 3V3m0 3v12m0-12h12m-3-3-3 3-3-3m3 3-3 3"/>
+                                    </svg>
+                                </button>
+                                <div class="shop-cost text-xl font-bold ${costDisplayClass}">${egg.cost} ${egg.costType === 'rebirth' ? 'RP' : 'PP'}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Handle purchase click, not the button
+                    eggItem.addEventListener('click', (e) => {
+                        // Prevent click on the button from triggering a hatch
+                        if (e.target.closest('.egg-info-btn')) {
+                            e.stopPropagation();
+                            return;
+                        }
+
+                        let canAfford = false;
+                        if (egg.costType === 'rebirth') {
+                            canAfford = rebirthPoints >= egg.cost;
+                            if(canAfford) rebirthPoints -= egg.cost;
+                        } else {
+                            canAfford = prestigePoints >= egg.cost;
+                            if(canAfford) prestigePoints -= egg.cost;
+                        }
+
+                        if(canAfford) {
+                            const newPet = hatchPet(egg.petPool);
+                            ownedPets.push(newPet);
+                            petsHatched++;
+                            if (newPet.rarity === 'Legendary' || newPet.rarity === 'Mythic') {
+                                hatchedLegendary = true;
+                            }
+                            const oldPetBonus = petBonus;
+                            equipBestPet();
+                            
+                            showPetModal(newPet, oldPetBonus);
+                            updateDisplay();
+                        }
+                    });
+
+                    // Event listener for the new info button
+                    const infoButton = eggItem.querySelector('.egg-info-btn');
+                    infoButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        eggPetList.innerHTML = '';
+                        egg.petPool.forEach(pet => {
+                            const petLi = document.createElement('li');
+                            petLi.textContent = `${pet.name} (${pet.rarity}) - ${pet.chance}%`;
+                            eggPetList.appendChild(petLi);
+                        });
+                        eggInfoModal.classList.add('open');
+                    });
+
+                    eggHatcheryContainer.appendChild(eggItem);
+                });
+            }
+
+            function createAchievements() {
+                achievementList.innerHTML = '';
+                achievements.forEach(achievement => {
+                    const achievementItem = document.createElement('div');
+                    achievementItem.id = achievement.id;
+                    achievementItem.classList.add('achievement-item', 'rounded-lg', 'shadow-md', 'p-4', 'flex', 'justify-between', 'items-center');
+                    if(achievement.completed && !achievement.claimed) {
+                        achievementItem.classList.add('bg-gray-700');
+                    } else if (achievement.claimed) {
+                        achievementItem.classList.add('completed');
+                    }
+                    
+                    const rewardText = achievement.claimed ? 'Claimed' : `${achievement.reward.value} ${achievement.reward.type === 'gems' ? 'Gems' : (achievement.reward.type === 'rebirthPoints' ? 'RP' : 'PP')}`;
+                    const claimButtonHtml = achievement.completed && !achievement.claimed ? `<button class="achievement-claim-btn">Claim</button>` : '';
+
+                    achievementItem.innerHTML = `
+                        <div class="achievement-info">
+                            <h3 class="text-xl font-bold">${achievement.name}</h3>
+                            <p class="text-sm text-gray-400">${achievement.description}</p>
+                        </div>
+                        <div class="achievement-actions">
+                            <div class="achievement-reward text-xl font-bold text-yellow-400">${rewardText}</div>
+                            ${claimButtonHtml}
+                        </div>
+                    `;
+
+                    achievementList.appendChild(achievementItem);
+
+                    if (claimButtonHtml) {
+                        const claimBtn = achievementItem.querySelector('.achievement-claim-btn');
+                        claimBtn.addEventListener('click', () => {
+                            claimAchievement(achievement);
+                        });
+                    }
+                });
+            }
+            
+            function claimAchievement(achievement) {
+                if (achievement.completed && !achievement.claimed) {
+                    if (achievement.reward.type === 'gems') {
+                        gems += achievement.reward.value;
+                    } else if (achievement.reward.type === 'rebirthPoints') {
+                        rebirthPoints += achievement.reward.value;
+                    } else if (achievement.reward.type === 'prestigePoints') {
+                        prestigePoints += achievement.reward.value;
+                    }
+                    achievement.claimed = true;
+                    updateDisplay();
+                    createAchievements();
+                }
+            }
+
+            function checkAchievements() {
+                achievements.forEach(achievement => {
+                    if (!achievement.completed && achievement.condition()) {
+                        achievement.completed = true;
+                        updateDisplay();
+                        createAchievements();
+                    }
+                });
+            }
+
+            function equipBestPet() {
+                const bestPet = ownedPets.reduce((best, current) => {
+                    return current.bonus > best.bonus ? current : best;
+                }, { bonus: 0 });
+
+                if (bestPet.bonus > 0) {
+                    petBonus = bestPet.bonus;
+                    petName = bestPet.name;
+                    petRarity = bestPet.rarity;
+                }
+            }
+
+            function hatchPet(petPool) {
+                const rand = Math.random() * 100;
+                let cumulativeChance = 0;
+                for(const pet of petPool) {
+                    cumulativeChance += pet.chance;
+                    if(rand <= cumulativeChance) {
+                        return pet;
+                    }
+                }
+                return petPool[0]; // Fallback
+            }
+
+            function showPetModal(pet, oldPetBonus) {
+                hatchedPetName.textContent = pet.name;
+                hatchedPetBonus.textContent = `Bonus: ${(pet.bonus-1)*100}%`;
+                
+                if (pet.bonus > oldPetBonus) {
+                    petEquipStatus.textContent = 'This is your new best pet!';
+                } else {
+                    petEquipStatus.textContent = `Current best pet is better: ${(oldPetBonus-1)*100}%`;
+                }
+
+
+                // Add special animation for rare pets
+                if(pet.rarity === 'Rare' || pet.rarity === 'Legendary' || pet.rarity === 'Mythic') {
+                    petModal.classList.add('rare-animation');
+                } else {
+                    petModal.classList.remove('rare-animation');
+                }
+
+                petModal.classList.add('open');
+            }
+
+            function showDevModal() {
+                devModal.classList.add('open');
+            }
+
+            function hideDevModal() {
+                devModal.classList.remove('open');
+            }
+
+            function floatUpText(amount, x, y, isBoss = false) {
+                const textElement = document.createElement('div');
+                textElement.classList.add('floating-text');
+                textElement.textContent = `+${Math.floor(amount)}`;
+                textElement.style.left = `${x}px`;
+                textElement.style.top = `${y}px`;
+                if(isBoss) {
+                    textElement.style.color = '#e3342f';
+                    textElement.style.textShadow = '0 0 5px rgba(227, 52, 47, 0.5)';
+                }
+                document.body.appendChild(textElement);
+
+                setTimeout(() => {
+                    textElement.remove();
+                }, 1000);
+            }
+
+            function resetGame() {
+                gems = 0;
+                gemsPerClick = 1;
+                gemsPerSecond = 0;
+                upgrades = JSON.parse(JSON.stringify(baseUpgrades));
+                createUpgrades();
+            }
+
+            function performRebirth() {
+                const rebirthsToGain = Math.floor(gems / rebirthCost) + rebirthPointBonus;
+                if (rebirthsToGain >= 1) {
+                    rebirths += rebirthsToGain;
+                    rebirthPoints += rebirthsToGain;
+                    rebirthCost = Math.floor(rebirthCost * Math.pow(1.5, rebirthsToGain));
+                    resetGame();
+                    checkAchievements();
+                } else {
+                    attemptedRebirths++;
+                }
+            }
+
+            function performPrestige() {
+                const prestigesToGain = Math.floor(rebirths / prestigeCostRebirths);
+                if (prestigesToGain >= 1) {
+                    prestige += prestigesToGain;
+                    prestigePoints += prestigesToGain;
+                    rebirths = 0;
+                    prestigeCostRebirths = Math.floor(prestigeCostRebirths * Math.pow(1.5, prestigesToGain));
+                    rebirthPoints = 0;
+                    rebirthShopItems = JSON.parse(JSON.stringify(baseRebirthShopItems));
+                    prestigeShopItems = JSON.parse(JSON.stringify(basePrestigeShopItems));
+                    
+                    resetGame();
+                    createShops();
+                    checkAchievements();
+                }
+            }
+            
+            function spawnBossGem(isMega = false) {
+                isBossActive = true;
+                isMegaBoss = isMega;
+                bossGemButton.classList.toggle('mega', isMegaBoss);
+                bossGemTitle.textContent = isMegaBoss ? 'MEGA BOSS!' : 'Boss Gem!';
+                
+                bossHp = isMegaBoss ? (10000 + Math.floor(Math.random() * 5000) * prestige) : (500 + Math.floor(Math.random() * 500) * prestige);
+                bossMaxHp = bossHp;
+                bossReward = isMegaBoss ? bossHp * 20 : bossHp * 10;
+                bossTimer = BOSS_GEM_DURATION;
+                
+                gemButton.style.display = 'none';
+                bossGemContainer.style.display = 'flex';
+
+                updateDisplay();
+            }
+            
+            function despawnBossGem() {
+                isBossActive = false;
+                bossGemContainer.style.display = 'none';
+                gemButton.style.display = 'block';
+                isMegaBoss = false;
+            }
+
+
+            // Main game loop
+            function gameLoop() {
+                const totalGemsPerSecond = (gemsPerSecond + totalAutoBonus) * petBonus;
+                if (!isBossActive) {
+                     gems += totalGemsPerSecond / 60;
+                     bossCountdown -= 1000 / 60;
+                     if (bossCountdown <= 0) {
+                        const isMega = Math.random() < 0.2; // 20% chance for a mega boss
+                        spawnBossGem(isMega);
+                        bossCountdown = BOSS_SPAWN_INTERVAL; // Reset the countdown
+                     }
+                } else {
+                    gems = Math.max(0, gems - (totalGemsPerSecond / 120)); // Gems go down while boss is active
+                    if (gems <= 0) {
+                        lostAllGemsToBoss = true;
+                    }
+                    bossTimer -= 1000 / 60;
+                    if (bossTimer <= 0) {
+                        despawnBossGem();
+                    }
+                }
+                
+                checkAchievements();
+                updateDisplay();
+                requestAnimationFrame(gameLoop);
+            }
+
+            // Event listener for the main gem button
+            gemButton.addEventListener('click', (e) => {
+                totalClicks++;
+                const totalGemsPerClick = (gemsPerClick + totalClickBonus) * petBonus;
+                gems += totalGemsPerClick;
+                updateDisplay();
+                
+                const rect = gemButton.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                floatUpText(totalGemsPerClick, e.clientX, e.clientY);
+            });
+            
+            bossGemButton.addEventListener('click', (e) => {
+                const totalGemsPerClick = (gemsPerClick + totalClickBonus) * petBonus;
+                const damage = totalGemsPerClick;
+                bossHp -= damage;
+                
+                floatUpText(damage, e.clientX, e.clientY, true);
+
+                if (bossHp <= 0) {
+                    gems += bossReward;
+                    despawnBossGem();
+                }
+                updateDisplay();
+            });
+
+            rebirthBtn.addEventListener('click', performRebirth);
+            prestigeBtn.addEventListener('click', performPrestige);
+            
+            // Pet modal close button
+            modalCloseBtn.addEventListener('click', () => {
+                petModal.classList.remove('open');
+            });
+
+            // Egg info modal close button
+            eggModalCloseBtn.addEventListener('click', () => {
+                eggInfoModal.classList.remove('open');
+            });
+
+            devBtn.addEventListener('click', () => {
+                devButtonClicks++;
+                if (devButtonClicks <= 2) {
+                    showDevModal();
+                } else {
+                    gems += 1;
+                    devButtonUsed = true;
+                    updateDisplay();
+                }
+            });
+
+            devModalYesBtn.addEventListener('click', () => {
+                hideDevModal();
+                gems = 1;
+                devButtonUsed = true;
+                updateDisplay();
+            });
+
+            devModalNoBtn.addEventListener('click', () => {
+                devButtonClicks = 0;
+                hideDevModal();
+            });
+            
+            // Customization shop listeners
+            customizationShop.querySelectorAll('.color-circle').forEach(circle => {
+                circle.addEventListener('click', () => {
+                    const color = circle.getAttribute('data-color');
+                    const floatingColor = circle.getAttribute('data-floating-color');
+                    const cost = parseInt(circle.getAttribute('data-cost'));
+                    
+                    if (gems >= cost) {
+                        gems -= cost;
+                        gemColor = color;
+                        floatingTextColor = floatingColor;
+                        document.documentElement.style.setProperty('--gem-color', gemColor);
+                        document.documentElement.style.setProperty('--floating-text-color', floatingTextColor);
+                        updateDisplay();
+                    }
+                });
+            });
+
+            // Tab Navigation Logic
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-target');
+
+                    // Deactivate all buttons and hide all content
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Activate the clicked button and show the corresponding content
+                    button.classList.add('active');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+
+
+            createUpgrades();
+            createShops();
+            createAchievements();
+            gameLoop();
+        });
+    </script>
+</body>
+</html>
