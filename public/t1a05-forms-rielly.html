@@ -1,1 +1,103 @@
+<html>
+<head>
+    <title>Basic Form Showcase</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        label, input, textarea, select, button, datalist {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+        
+        input, textarea, select {
+            padding: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .radio-group input, .checkbox-group input {
+            width: auto;
+            margin-right: 5px;
+        }
+
+        .radio-group label, .checkbox-group label {
+            width: auto;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <form action="#">
+        <h1>t1a05 forms rielly</h1>
+        
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name">
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email">
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password">
+
+        <label for="country">Country:</label>
+        <input list="country-options" id="country" name="country">
+        <datalist id="country-options">
+            <option value="United States">
+            <option value="Canada">
+            <option value="United Kingdom">
+            <option value="Australia">
+            <option value="Germany">
+        </datalist>
+        <p>Choose your favorite color:</p>
+        <div class="radio-group">
+            <input type="radio" id="red" name="color" value="red">
+            <label for="red">Red</label>
+            <input type="radio" id="blue" name="color" value="blue">
+            <label for="blue">Blue</label>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="subscribe" name="subscribe" value="yes">
+            <label for="subscribe">Subscribe to our newsletter?</label>
+        </div>
+        <label for="comments">Comments:</label>
+        <textarea id="comments" name="comments" rows="4"></textarea>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
