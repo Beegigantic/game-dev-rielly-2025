@@ -1,55 +1,70 @@
-
-
 <html>
 <head>
-    <title>Flappy Bird</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
             background-color: #f0f0f0;
             font-family: sans-serif;
+            margin: 20px;
         }
-        canvas {
-            border: 2px solid #333;
-            background-color: #70c5ce;
+        h2 {
+            margin-top: 40px;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+            color: #444;
         }
-        h1 {
+        .game-container {
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 10px;
             margin-bottom: 20px;
-            font-size: 2em;
+            background-color: #fff;
+            text-align: center;
         }
-        p {
-            margin-top: 20px;
-            font-size: 1.2em;
+        .simple-game-canvas {
+            background-color: #70c5ce;
+            border: 1px solid #333;
+        }
+        .enhanced-game-canvas {
+            background: linear-gradient(#87ceeb, #e0f6ff);
+            border: 2px solid #333;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
-  <h1 align=center>t1a04 vibe code cleaning Rielly</h1>
-<canvas id="gameCanvas02" width="320" height="480"></canvas>
+    <h1 align="center">t1a04 Vibe Code Cleaning Rielly</h1>
+    <div class="game-container">
+        <h2>Game 1: My cleaned code</h2>
+        <canvas id="simpleGameCanvas" class="simple-game-canvas" width="320" height="480"></canvas>
+    </div>
+
+    <div class="game-container">
+        <h2>Game 2: Original code</h2>
+        <canvas id="enhancedGameCanvas" class="enhanced-game-canvas" width="320" height="480"></canvas>
+    </div>
 
     <script>
-        const canvas02 = document.getElementById('gameCanvas02');
-        const context02 = canvas02.getContext('2d');
+        const simpleCanvas = document.getElementById('simpleGameCanvas');
+        const simpleContext = simpleCanvas.getContext('2d');
 
-        let score = 0;
-        let isGameOver = false;
+        let simpleScore = 0;
+        let simpleIsGameOver = false;
 
-        const bird = {
+        const simpleBird = {
             x: 50,
-            y: canvas02.height / 2,
+            y: simpleCanvas.height / 2,
             width: 30,
             height: 30,
             gravity: 0.2,
             velocity: 0,
             jumpStrength: -4,
             draw: function() {
-                context02.fillStyle = 'yellow';
-                context02.fillRect(this.x, this.y, this.width, this.height);
+                simpleContext.fillStyle = 'yellow';
+                simpleContext.fillRect(this.x, this.y, this.width, this.height);
             },
             update: function() {
                 this.velocity += this.gravity;
@@ -60,46 +75,45 @@
             }
         };
 
-        let pipes = [];
-        const pipeWidth = 50;
-        const pipeGap = 120;
-        let pipeSpeed = 2;
+        let simplePipes = [];
+        const simplePipeWidth = 50;
+        const simplePipeGap = 120;
+        let simplePipeSpeed = 2;
 
-        function createPipe() {
-            const topPipeHeight = Math.random() * (canvas02.height - pipeGap - 100) + 50;
-            pipes.push({
-                x: canvas02.width,
-                topHeight: topPipeHeight,
-                bottomHeight: canvas02.height - topPipeHeight - pipeGap,
+        function simpleCreatePipe() {
+            const topHeight = Math.random() * (simpleCanvas.height - simplePipeGap - 100) + 50;
+            simplePipes.push({
+                x: simpleCanvas.width,
+                topHeight: topHeight,
+                bottomHeight: simpleCanvas.height - topHeight - simplePipeGap,
                 scored: false
             });
         }
 
-        function drawPipes() {
-            context02.fillStyle = 'green';
-            for (let i = 0; i < pipes.length; i++) {
-                const pipe = pipes[i];
-                context02.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
-                context02.fillRect(pipe.x, canvas02.height - pipe.bottomHeight, pipeWidth, pipe.bottomHeight);
+        function simpleDrawPipes() {
+            simpleContext.fillStyle = 'green';
+            for (let i = 0; i < simplePipes.length; i++) {
+                const pipe = simplePipes[i];
+                simpleContext.fillRect(pipe.x, 0, simplePipeWidth, pipe.topHeight);
+                simpleContext.fillRect(pipe.x, simpleCanvas.height - pipe.bottomHeight, simplePipeWidth, pipe.bottomHeight);
             }
         }
 
-        function updatePipes() {
-            for (let i = 0; i < pipes.length; i++) {
-                pipes[i].x -= pipeSpeed;
+        function simpleUpdatePipes() {
+            for (let i = 0; i < simplePipes.length; i++) {
+                simplePipes[i].x -= simplePipeSpeed;
             }
-            pipes = pipes.filter(pipe => pipe.x + pipeWidth > 0);
+            simplePipes = simplePipes.filter(pipe => pipe.x + simplePipeWidth > 0);
         }
 
-        function checkCollision() {
-            if (bird.y + bird.height > canvas02.height || bird.y < 0) {
+        function simpleCheckCollision() {
+            if (simpleBird.y + simpleBird.height > simpleCanvas.height || simpleBird.y < 0) {
                 return true;
             }
-
-            for (let i = 0; i < pipes.length; i++) {
-                const pipe = pipes[i];
-                if (bird.x < pipe.x + pipeWidth && bird.x + bird.width > pipe.x) {
-                    if (bird.y < pipe.topHeight || bird.y + bird.height > canvas02.height - pipe.bottomHeight) {
+            for (let i = 0; i < simplePipes.length; i++) {
+                const pipe = simplePipes[i];
+                if (simpleBird.x < pipe.x + simplePipeWidth && simpleBird.x + simpleBird.width > pipe.x) {
+                    if (simpleBird.y < pipe.topHeight || simpleBird.y + simpleBird.height > simpleCanvas.height - pipe.bottomHeight) {
                         return true;
                     }
                 }
@@ -107,108 +121,85 @@
             return false;
         }
 
-        function updateScore() {
-            for (let i = 0; i < pipes.length; i++) {
-                const pipe = pipes[i];
-                if (pipe.x + pipeWidth < bird.x && !pipe.scored) {
-                    score++;
+        function simpleUpdateScore() {
+            for (let i = 0; i < simplePipes.length; i++) {
+                const pipe = simplePipes[i];
+                if (pipe.x + simplePipeWidth < simpleBird.x && !pipe.scored) {
+                    simpleScore++;
                     pipe.scored = true;
                 }
             }
         }
 
-        function drawScore() {
-            context02.fillStyle = 'white';
-            context02.font = '24px sans-serif';
-            context02.textAlign = 'center';
-            context02.fillText(`Score: ${score}`, canvas02.width / 2, 40);
+        function simpleDrawScore() {
+            simpleContext.fillStyle = 'white';
+            simpleContext.font = '24px sans-serif';
+            simpleContext.textAlign = 'center';
+            simpleContext.fillText(`Score: ${simpleScore}`, simpleCanvas.width / 2, 40);
         }
 
-        let frameCount = 0;
-        function gameLoop() {
-            if (isGameOver) {
-                context02.fillStyle = 'red';
-                context02.font = '30px sans-serif';
-                context02.textAlign = 'center';
-                context02.fillText('Game Over!', canvas02.width / 2, canvas02.height / 2);
-                context02.font = '20px sans-serif';
-                context02.fillText('Press space to restart', canvas02.width / 2, canvas02.height / 2 + 30);
+        let simpleFrameCount = 0;
+        function simpleGameLoop() {
+            if (simpleIsGameOver) {
+                simpleContext.fillStyle = 'red';
+                simpleContext.font = '30px sans-serif';
+                simpleContext.textAlign = 'center';
+                simpleContext.fillText('Game Over!', simpleCanvas.width / 2, simpleCanvas.height / 2);
+                simpleContext.font = '20px sans-serif';
+                simpleContext.fillText('Click to restart', simpleCanvas.width / 2, simpleCanvas.height / 2 + 30);
                 return;
             }
-
-            context02.clearRect(0, 0, canvas02.width, canvas02.height);
-
-            bird.update();
-            bird.draw();
-            updatePipes();
-            drawPipes();
-
-            if (checkCollision()) {
-                isGameOver = true;
+            simpleContext.clearRect(0, 0, simpleCanvas.width, simpleCanvas.height);
+            simpleBird.update();
+            simpleBird.draw();
+            simpleUpdatePipes();
+            simpleDrawPipes();
+            if (simpleCheckCollision()) {
+                simpleIsGameOver = true;
             }
-            updateScore();
-            drawScore();
-
-            if (frameCount % 120 === 0) {
-                createPipe();
+            simpleUpdateScore();
+            simpleDrawScore();
+            if (simpleFrameCount % 120 === 0) {
+                simpleCreatePipe();
             }
-            frameCount++;
-
-            window.requestAnimationFrame(gameLoop);
+            simpleFrameCount++;
+            window.requestAnimationFrame(simpleGameLoop);
         }
 
-        document.onkeydown = function(event) {
-            if (event.key === ' ' || event.key === 'Spacebar') {
-                if (isGameOver) {
-                    score = 0;
-                    pipes = [];
-                    bird.y = canvas02.height / 2;
-                    bird.velocity = 0;
-                    isGameOver = false;
-                    frameCount = 0;
-                    gameLoop();
-                } else {
-                    bird.flap();
-                }
+        simpleCanvas.addEventListener('click', function() {
+            if (simpleIsGameOver) {
+                simpleScore = 0;
+                simplePipes = [];
+                simpleBird.y = simpleCanvas.height / 2;
+                simpleBird.velocity = 0;
+                simpleIsGameOver = false;
+                simpleFrameCount = 0;
+                simpleGameLoop();
+            } else {
+                simpleBird.flap();
             }
-        };
+        });
 
-        window.onload = function() {
-            gameLoop();
-        };
+        const enhancedCanvas = document.getElementById('enhancedGameCanvas');
+        const enhancedContext = enhancedCanvas.getContext('2d');
 
-    </script><br><br>
+        let enhancedScore = 0;
+        let enhancedIsGameOver = false;
 
-//If doing Javascript script are the variables sensibly named using camelCase "myVar" etc don't use promises. then instead use async/await, no addEventListeners unless necessary, get ChatGPT to make the changes. More changes... only simple javascript nothing fancy.
-
-<br><br>
-
-//Here is the original vibecode <br>
-    <h1>Flappy Bird</h1>
-    <canvas id="gameCanvas" width="320" height="480"></canvas>
-    <p>Press the spacebar to flap.</p>
-
-    <script>
-        // Get the canvas and its 2D context
-        const canvas = document.getElementById('gameCanvas');
-        const context = canvas.getContext('2d');
-
-        // Game state variables
-        let score = 0;
-        let isGameOver = false;
-
-        // Bird properties
-        const bird = {
+        const enhancedBird = {
             x: 50,
-            y: canvas.height / 2,
+            y: enhancedCanvas.height / 2,
             width: 30,
             height: 30,
-            gravity: 0.2,
+            gravity: 0.25,
             velocity: 0,
-            jumpStrength: -4,
+            jumpStrength: -5,
             draw: function() {
-                context.fillStyle = 'yellow';
-                context.fillRect(this.x, this.y, this.width, this.height);
+                enhancedContext.fillStyle = 'orange';
+                enhancedContext.beginPath();
+                enhancedContext.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2, 0, Math.PI * 2);
+                enhancedContext.fill();
+                enhancedContext.closePath();
             },
             update: function() {
                 this.velocity += this.gravity;
@@ -219,58 +210,53 @@
             }
         };
 
-        // Pipe properties
-        let pipes = [];
-        const pipeWidth = 50;
-        const pipeGap = 120;
-        let pipeSpeed = 2;
+        let enhancedPipes = [];
+        const enhancedPipeWidth = 60;
+        const enhancedPipeGap = 130;
+        let enhancedPipeSpeed = 2;
 
-        // Function to create a new pipe
-        function createPipe() {
-            const topPipeHeight = Math.random() * (canvas.height - pipeGap - 100) + 50;
-            pipes.push({
-                x: canvas.width,
-                topHeight: topPipeHeight,
-                bottomHeight: canvas.height - topPipeHeight - pipeGap,
+        function enhancedCreatePipe() {
+            const topHeight = Math.random() * (enhancedCanvas.height - enhancedPipeGap - 100) + 50;
+            enhancedPipes.push({
+                x: enhancedCanvas.width,
+                topHeight: topHeight,
+                bottomHeight: enhancedCanvas.height - topHeight - enhancedPipeGap,
                 scored: false
             });
         }
 
-        // Function to draw pipes
-        function drawPipes() {
-            context.fillStyle = 'green';
-            for (let i = 0; i < pipes.length; i++) {
-                const pipe = pipes[i];
-                // Top pipe
-                context.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
-                // Bottom pipe
-                context.fillRect(pipe.x, canvas.height - pipe.bottomHeight, pipeWidth, pipe.bottomHeight);
+        function enhancedDrawPipes() {
+            // Draw main pipe bodies
+            enhancedContext.fillStyle = '#2c3e50';
+            for (let i = 0; i < enhancedPipes.length; i++) {
+                const pipe = enhancedPipes[i];
+                enhancedContext.fillRect(pipe.x, 0, enhancedPipeWidth, pipe.topHeight);
+                enhancedContext.fillRect(pipe.x, enhancedCanvas.height - pipe.bottomHeight, enhancedPipeWidth, pipe.bottomHeight);
+
+                // Draw pipe caps
+                const capHeight = 20;
+                enhancedContext.fillStyle = '#34495e';
+                enhancedContext.fillRect(pipe.x - 5, pipe.topHeight - capHeight, enhancedPipeWidth + 10, capHeight);
+                enhancedContext.fillRect(pipe.x - 5, enhancedCanvas.height - pipe.bottomHeight, enhancedPipeWidth + 10, capHeight);
             }
         }
 
-        // Function to update pipe positions
-        function updatePipes() {
-            for (let i = 0; i < pipes.length; i++) {
-                pipes[i].x -= pipeSpeed;
+        function enhancedUpdatePipes() {
+            enhancedPipeSpeed += 0.001; // Increasing speed
+            for (let i = 0; i < enhancedPipes.length; i++) {
+                enhancedPipes[i].x -= enhancedPipeSpeed;
             }
-            // Remove pipes that are off-screen
-            pipes = pipes.filter(pipe => pipe.x + pipeWidth > 0);
+            enhancedPipes = enhancedPipes.filter(pipe => pipe.x + enhancedPipeWidth > 0);
         }
 
-        // Function for collision detection
-        function checkCollision() {
-            // Check for collision with the ground or ceiling
-            if (bird.y + bird.height > canvas.height || bird.y < 0) {
+        function enhancedCheckCollision() {
+            if (enhancedBird.y + enhancedBird.height > enhancedCanvas.height || enhancedBird.y < 0) {
                 return true;
             }
-
-            // Check for collision with pipes
-            for (let i = 0; i < pipes.length; i++) {
-                const pipe = pipes[i];
-                // Check if bird is within the horizontal range of the pipe
-                if (bird.x < pipe.x + pipeWidth && bird.x + bird.width > pipe.x) {
-                    // Check for collision with top or bottom pipe
-                    if (bird.y < pipe.topHeight || bird.y + bird.height > canvas.height - pipe.bottomHeight) {
+            for (let i = 0; i < enhancedPipes.length; i++) {
+                const pipe = enhancedPipes[i];
+                if (enhancedBird.x < pipe.x + enhancedPipeWidth && enhancedBird.x + enhancedBird.width > pipe.x) {
+                    if (enhancedBird.y < pipe.topHeight || enhancedBird.y + enhancedBird.height > enhancedCanvas.height - pipe.bottomHeight) {
                         return true;
                     }
                 }
@@ -278,91 +264,71 @@
             return false;
         }
 
-        // Function to check and update score
-        function updateScore() {
-            for (let i = 0; i < pipes.length; i++) {
-                const pipe = pipes[i];
-                // Check if the bird has passed the pipe and hasn't scored yet
-                if (pipe.x + pipeWidth < bird.x && !pipe.scored) {
-                    score++;
+        function enhancedUpdateScore() {
+            for (let i = 0; i < enhancedPipes.length; i++) {
+                const pipe = enhancedPipes[i];
+                if (pipe.x + enhancedPipeWidth < enhancedBird.x && !pipe.scored) {
+                    enhancedScore++;
                     pipe.scored = true;
                 }
             }
         }
 
-        // Function to draw the score on the canvas
-        function drawScore() {
-            context.fillStyle = 'white';
-            context.font = '24px sans-serif';
-            context.textAlign = 'center';
-            context.fillText(`Score: ${score}`, canvas.width / 2, 40);
+        function enhancedDrawScore() {
+            enhancedContext.fillStyle = 'black';
+            enhancedContext.font = '24px sans-serif';
+            enhancedContext.textAlign = 'center';
+            enhancedContext.fillText(`Score: ${enhancedScore}`, enhancedCanvas.width / 2, 40);
         }
 
-        // Main game loop
-        let frameCount = 0;
-        function gameLoop() {
-            if (isGameOver) {
-                // Display game over message
-                context.fillStyle = 'red';
-                context.font = '30px sans-serif';
-                context.textAlign = 'center';
-                context.fillText('Game Over!', canvas.width / 2, canvas.height / 2);
-                context.font = '20px sans-serif';
-                context.fillText('Press space to restart', canvas.width / 2, canvas.height / 2 + 30);
+        let enhancedFrameCount = 0;
+        function enhancedGameLoop() {
+            if (enhancedIsGameOver) {
+                enhancedContext.fillStyle = '#c0392b';
+                enhancedContext.font = '30px sans-serif';
+                enhancedContext.textAlign = 'center';
+                enhancedContext.fillText('Game Over!', enhancedCanvas.width / 2, enhancedCanvas.height / 2);
+                enhancedContext.font = '20px sans-serif';
+                enhancedContext.fillText('Click to restart', enhancedCanvas.width / 2, enhancedCanvas.height / 2 + 30);
                 return;
             }
-
-            // Clear the canvas
-            context.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Update and draw game elements
-            bird.update();
-            bird.draw();
-            updatePipes();
-            drawPipes();
-
-            // Check for collisions and update score
-            if (checkCollision()) {
-                isGameOver = true;
+            enhancedContext.clearRect(0, 0, enhancedCanvas.width, enhancedCanvas.height);
+            enhancedBird.update();
+            enhancedBird.draw();
+            enhancedUpdatePipes();
+            enhancedDrawPipes();
+            if (enhancedCheckCollision()) {
+                enhancedIsGameOver = true;
             }
-            updateScore();
-            drawScore();
-
-            // Create a new pipe every 120 frames
-            if (frameCount % 120 === 0) {
-                createPipe();
+            enhancedUpdateScore();
+            enhancedDrawScore();
+            if (enhancedFrameCount % 100 === 0) { // Pipes spawn faster
+                enhancedCreatePipe();
             }
-            frameCount++;
-
-            // Loop the animation
-            window.requestAnimationFrame(gameLoop);
+            enhancedFrameCount++;
+            window.requestAnimationFrame(enhancedGameLoop);
         }
 
-        // Event listener for user input (spacebar)
-        document.onkeydown = function(event) {
-            if (event.key === ' ' || event.key === 'Spacebar') {
-                if (isGameOver) {
-                    // Reset the game
-                    score = 0;
-                    pipes = [];
-                    bird.y = canvas.height / 2;
-                    bird.velocity = 0;
-                    isGameOver = false;
-                    frameCount = 0;
-                    gameLoop();
-                } else {
-                    bird.flap();
-                }
+        enhancedCanvas.addEventListener('click', function() {
+            if (enhancedIsGameOver) {
+                enhancedScore = 0;
+                enhancedPipes = [];
+                enhancedBird.y = enhancedCanvas.height / 2;
+                enhancedBird.velocity = 0;
+                enhancedIsGameOver = false;
+                enhancedFrameCount = 0;
+                enhancedGameLoop();
+            } else {
+                enhancedBird.flap();
             }
-        };
+        });
 
-        // Start the game loop when the page loads
         window.onload = function() {
-            gameLoop();
+            simpleGameLoop();
+            enhancedGameLoop();
         };
 
     </script>
-  <br><br>
-Final comments: Any observations about your code compared to the videCode<br>
+ In my opinion the non-cleaned code looks and runs better but its way too complicated for someone like me to fully understand.
 </body>
 </html>
