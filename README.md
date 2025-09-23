@@ -104,7 +104,7 @@ Note: If you have a link to an assignment that has not been marked, put "open" a
 <details ><summary>Monday Sept 22nd, 2025</summary>
 
 ### Title
-1.
+1.I was away sick.
 1.
 1.
 
@@ -113,9 +113,9 @@ Note: If you have a link to an assignment that has not been marked, put "open" a
 <details><summary>Tuesday Sept 23rd, 2025</summary>
 
 ### Title
-1.
-1.
-1.
+1. I started t1a06 css
+1. I finished it
+1. worked on fixing other assignments
 
 </details>
 
