@@ -1,3 +1,4 @@
+<a href="https://beegigantic.github.io/game-dev-rielly-2025/public/index.html">Back to my index</a></button><br>
 <h1 align=center> t1a07 easy EDA rielly </h1>
 <br>
 Use this link <a href="https://www.youtube.com/watch?v=gjPNYMRA0m8&list=PLbKMtvtYbdPMZfzGuVTdc0MWKrFvU4nsu&index=4">easy EDA tutorial Video</a><br>
