@@ -1,0 +1,44 @@
+<h1 align="center">t1a08 in out rielly</h1>
+
+<input type="text" id="myText01" placeholder="Write here..."><br>
+
+<span id="mySpan01">..</span><br>
+
+<button onClick="myButton01()">Click me</button><br><br><br>
+
+
+
+
+
+
+<h1>reversed string</h1>
+<input type="text" id="myText02" placeholder="Write here..."><br>
+
+<span id="mySpan02">..</span><br>
+
+<button onClick="myButton02()">Click me</button><br>
+
+<h1>reversed string 02</h1>
+<input type="text" id="myText03" placeholder="Write here..."><br>
+
+<span id="mySpan03">..</span><br>
+
+<button onClick="myButton03()">Click me</button><br>
+
+
+<script>
+
+function myButton01() {
+	document.getElementById("mySpan01").innerHTML = document.getElementById("myText01").value;
+}
+
+function myButton02() {
+	const str = document.getElementById("myText02").value;
+	const reversed = str.split('').reverse().join('');
+	document.getElementById("mySpan02").innerText = reversed;
+}
+
+function myButton03() {
+	document.getElementById("mySpan03").innerText = document.getElementById("myText03").value.split('').reverse().join('')
+}
+</script>
