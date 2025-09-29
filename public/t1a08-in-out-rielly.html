@@ -25,6 +25,13 @@
 
 <button onClick="myButton03()">Click me</button><br>
 
+<h1>passing the variable</h1>
+
+<input type="text" id="myText04" placeholder="Write here..."><br>
+
+<span id="mySpan04">..</span><br>
+
+<button onClick="myButton04(document.getElementById("myText04").value)">Click me</button><br><br><br>
 
 <script>
 
@@ -41,4 +48,9 @@ function myButton02() {
 function myButton03() {
 	document.getElementById("mySpan03").innerText = document.getElementById("myText03").value.split('').reverse().join('')
 }
+
+function myButton04() {
+	document.getElementById("mySpan04").innerHTML = userInput;
+}
+
 </script>
