@@ -2,17 +2,53 @@
 
 Show correct use of const, var, let and interger, character, boolean, float, and string.<br>
 
+<h2>Concatenating (adding) strings</h2>
+
 <input id="myNum01" type=text placeholder="Write Here...">
 +
 <input id="myNum02" type=text placeholder="Write Another Thing Here..."><br>
-<span id="mySpan01">...</span>span><br>
+<span id="mySpan01">...</span><br>
 
 <input type=button value="add (concatenate) strings" onclick="{
   let myFirst = document.getElementById('myNum01').value
   var mySecond = document.getElementById('myNum02').value
-  const myOut = document.getElementById('mySpan')
+  const myOut = document.getElementById('mySpan01')
   myOut.innerHTML = myFirst + ' ' + mySecond
   }"> <br>
 
 
-  You do similar versions of this for interger character, boolean and float.
+  You do similar versions of this for interger character, boolean and float.<br><br>
+
+<h2> Adding Floating point numbers</h2><br>
+
+<input id="myNum03" type=text value="3.4" >
++
+<input id="myNum04" type=text value="2.1" ><br>
+<span id="mySpan02">...</span><br>
+
+<input type=button value="add floating point numbers" onclick="{
+    let myFirstNum = document.getElementById('myNum03').value
+    var mySecondNum = document.getElementById('myNum04').value
+    let myAnswer = parseFloat(myFirstNum) + parseFloat(mySecondNum)
+    const myOut02 = document.getElementById('mySpan02')
+    myOut02.innerHTML = myFirstNum + ' + ' + mySecondNum + ' = ' + myAnswer
+  }"><br>
+
+  <h2> test for boolean</h2>
+
+  <input id="myBool" type=text value="3.4" >
+
+  <span id="mySpan03">...</span><br>
+
+  <input type=button value="is boolean?" onclick="{
+    let myBool = document.getElementById('myBool').value
+    const myOut03 = document.getElementById('mySpan03')
+
+    if (myBool.toLowerCase() === 'true' || myBool.toLowerCase() === 'false') {
+    myAnswer = 'Yes'
+    } else {
+    myAnswer = 'No'
+    }
+
+    myOut03.innerHTML = 'Is ' + myBool + ' a boolean?  + myAnswer
+    }"><br>
