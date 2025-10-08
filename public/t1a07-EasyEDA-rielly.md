@@ -4,7 +4,6 @@
 Use this link <a href="https://www.youtube.com/watch?v=gjPNYMRA0m8&list=PLbKMtvtYbdPMZfzGuVTdc0MWKrFvU4nsu&index=4">easy EDA tutorial Video</a><br>
 
 
-
 PCB's are circut board built to mount and orginize components so they work together and create a ultimate goal.<br>
 
 I designed this PCB with a LED, Battery, and Resistor.<br>
