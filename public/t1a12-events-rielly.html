@@ -6,27 +6,24 @@
     <p>All styling is default browser styling to comply with the 'ZERO CSS' request. The status box below shows the results of each event.</p>
 
     <!-- Output Area -->
-    <h2>Current Event Status</h2>
+    <h2>Event Status</h2>
     <div id="status">
         Loading...
     </div>
     
     <hr>
     
-    <script>
-        let clickCount = 0;
-        // Helper function to update the status message
-        function updateStatus(message) {
-            document.getElementById('status').innerHTML = message;
-        }
-    </script>
+
 
     <!-- Event 2: onclick -->
     <h2>2. onclick</h2>
     <button onclick="clickCount++; updateStatus('Button clicked! Total clicks: ' + clickCount + ' (Event 2: onclick)');">
         Click Me to Count
-    </button>
-    
+    </button><br>
+        <h2>Event Status</h2>
+    <div id="status">
+        Loading...
+    </div>
     <hr>
 
     <!-- Event 3 & 4: onmouseover / onmouseout -->
@@ -38,8 +35,11 @@
         <h3>Hover Test Area</h3>
         <p>Move your mouse over this block of text to trigger the hover events.</p>
         <p>This paragraph is part of the hover area.</p>
+    </div><br>
+            <h2>Event Status</h2>
+    <div id="status">
+        Loading...
     </div>
-    
     <hr>
 
     <!-- Event 5: onchange -->
@@ -50,8 +50,11 @@
         <option value="Alpha">Alpha</option>
         <option value="Beta">Beta</option>
         <option value="Gamma">Gamma</option>
-    </select>
-    
+    </select><br>
+            <h2>Event Status</h2>
+    <div id="status">
+        Loading...
+    </div>
     <hr>
 
     <!-- Event 6 & 7: onfocus / onblur -->
@@ -63,7 +66,11 @@
         placeholder="Click/Tap Here, then click outside"
         onfocus="updateStatus('Input field gained focus! (Event 6: onfocus)');"
         onblur="updateStatus('Input field lost focus! (Event 7: onblur)');">
-    
+    <br>
+            <h2>Event Status</h2>
+    <div id="status">
+        Loading...
+    </div>
     <hr>
 
     <!-- Event 8: onkeydown -->
@@ -73,7 +80,17 @@
         id="keyInput"
         type="text" 
         placeholder="Press any key here"
-        onkeydown="updateStatus('Key Pressed: ' + event.key + ' (Event 8: onkeydown)');">
-    
+        onkeydown="updateStatus('Key Pressed: ' + event.key + ' (Event 8: onkeydown)');"><br>
+            <h2>Event Status</h2>
+    <div id="status">
+        Loading...
+    </div>
+        <script>
+        let clickCount = 0;
+        // Helper function to update the status message
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = message;
+        }
+    </script>
 </body>
 </html>
