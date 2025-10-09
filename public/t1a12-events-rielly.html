@@ -1,29 +1,25 @@
 <html>
-<!-- Event 1: onload (Triggers as soon as the body finishes loading) -->
-<body onload="document.getElementById('status').innerHTML = 'Document Loaded successfully (Event 1: onload)';">
+<body style="padding-bottom: 120px;" onload="updateStatus('Document Loaded successfully (Event 1: onload)');">
 
     <h1 align=center>t1a12 events rielly</h1>
-    <p>All styling is default browser styling to comply with the 'ZERO CSS' request. The status box below shows the results of each event.</p>
 
-    <!-- Output Area -->
-    <h2>Event Status</h2>
-    <div id="status">
-        Loading...
+    <!-- The Status Output area is now wrapped in a fixed container with inline styles -->
+    <div id="status-container" style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: white; border-top: 2px solid black; padding: 10px; box-sizing: border-box; z-index: 1000;">
+        <h2>Event Status Output (Always Visible)</h2>
+        <div id="status">
+            Loading...
+        </div>
     </div>
     
     <hr>
     
-
 
     <!-- Event 2: onclick -->
     <h2>2. onclick</h2>
     <button onclick="clickCount++; updateStatus('Button clicked! Total clicks: ' + clickCount + ' (Event 2: onclick)');">
         Click Me to Count
     </button><br>
-        <h2>Event Status</h2>
-    <div id="status">
-        Loading...
-    </div>
+    
     <hr>
 
     <!-- Event 3 & 4: onmouseover / onmouseout -->
@@ -31,15 +27,13 @@
     <!-- The content gives the div size, making it hoverable -->
     <div 
         onmouseover="updateStatus('Mouse entered this text area! (Event 3: onmouseover)');"
-        onmouseout="updateStatus('Mouse left this text area! (Event 4: onmouseout)');">
+        onmouseout="updateStatus('Mouse left this text area! (Event 4: onmouseout)');"
+        style="border: 1px solid black; padding: 10px;"> <!-- Inline style for visibility -->
         <h3>Hover Test Area</h3>
         <p>Move your mouse over this block of text to trigger the hover events.</p>
         <p>This paragraph is part of the hover area.</p>
     </div><br>
-            <h2>Event Status</h2>
-    <div id="status">
-        Loading...
-    </div>
+    
     <hr>
 
     <!-- Event 5: onchange -->
@@ -51,10 +45,7 @@
         <option value="Beta">Beta</option>
         <option value="Gamma">Gamma</option>
     </select><br>
-            <h2>Event Status</h2>
-    <div id="status">
-        Loading...
-    </div>
+    
     <hr>
 
     <!-- Event 6 & 7: onfocus / onblur -->
@@ -67,10 +58,7 @@
         onfocus="updateStatus('Input field gained focus! (Event 6: onfocus)');"
         onblur="updateStatus('Input field lost focus! (Event 7: onblur)');">
     <br>
-            <h2>Event Status</h2>
-    <div id="status">
-        Loading...
-    </div>
+    
     <hr>
 
     <!-- Event 8: onkeydown -->
@@ -81,13 +69,11 @@
         type="text" 
         placeholder="Press any key here"
         onkeydown="updateStatus('Key Pressed: ' + event.key + ' (Event 8: onkeydown)');"><br>
-            <h2>Event Status</h2>
-    <div id="status">
-        Loading...
-    </div>
-        <script>
+    
+    <!-- The script containing the shared logic is kept at the end -->
+    <script>
         let clickCount = 0;
-        // Helper function to update the status message
+        // Helper function to update the single status element
         function updateStatus(message) {
             document.getElementById('status').innerHTML = message;
         }
