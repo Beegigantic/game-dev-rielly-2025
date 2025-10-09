@@ -1,0 +1,79 @@
+<html>
+<!-- Event 1: onload (Triggers as soon as the body finishes loading) -->
+<body onload="document.getElementById('status').innerHTML = 'Document Loaded successfully (Event 1: onload)';">
+
+    <h1>t1a12 events rielly</h1>
+    <p>All styling is default browser styling to comply with the 'ZERO CSS' request. The status box below shows the results of each event.</p>
+
+    <!-- Output Area -->
+    <h2>Current Event Status</h2>
+    <div id="status">
+        Loading...
+    </div>
+    
+    <hr>
+    
+    <script>
+        let clickCount = 0;
+        // Helper function to update the status message
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = message;
+        }
+    </script>
+
+    <!-- Event 2: onclick -->
+    <h2>2. onclick</h2>
+    <button onclick="clickCount++; updateStatus('Button clicked! Total clicks: ' + clickCount + ' (Event 2: onclick)');">
+        Click Me to Count
+    </button>
+    
+    <hr>
+
+    <!-- Event 3 & 4: onmouseover / onmouseout -->
+    <h2>3 & 4. onmouseover / onmouseout</h2>
+    <!-- The content gives the div size, making it hoverable -->
+    <div 
+        onmouseover="updateStatus('Mouse entered this text area! (Event 3: onmouseover)');"
+        onmouseout="updateStatus('Mouse left this text area! (Event 4: onmouseout)');">
+        <h3>Hover Test Area</h3>
+        <p>Move your mouse over this block of text to trigger the hover events.</p>
+        <p>This paragraph is part of the hover area.</p>
+    </div>
+    
+    <hr>
+
+    <!-- Event 5: onchange -->
+    <h2>5. onchange</h2>
+    <label for="selection">Choose an option (Event 5: onchange):</label>
+    <select id="selection" onchange="updateStatus('Dropdown selection changed to: ' + this.value + ' (Event 5: onchange)');">
+        <option value="">-- Select --</option>
+        <option value="Alpha">Alpha</option>
+        <option value="Beta">Beta</option>
+        <option value="Gamma">Gamma</option>
+    </select>
+    
+    <hr>
+
+    <!-- Event 6 & 7: onfocus / onblur -->
+    <h2>6 & 7. onfocus / onblur</h2>
+    <label for="focusInput">Focus/Blur Test:</label>
+    <input 
+        id="focusInput"
+        type="text" 
+        placeholder="Click/Tap Here, then click outside"
+        onfocus="updateStatus('Input field gained focus! (Event 6: onfocus)');"
+        onblur="updateStatus('Input field lost focus! (Event 7: onblur)');">
+    
+    <hr>
+
+    <!-- Event 8: onkeydown -->
+    <h2>8. onkeydown</h2>
+    <label for="keyInput">Key Press Test:</label>
+    <input 
+        id="keyInput"
+        type="text" 
+        placeholder="Press any key here"
+        onkeydown="updateStatus('Key Pressed: ' + event.key + ' (Event 8: onkeydown)');">
+    
+</body>
+</html>
