@@ -1,0 +1,66 @@
+<html>
+<script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div id="main-content" class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full text-center">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Window Launch Status</h1>
+        <p id="status-message" class="text-lg text-indigo-600 mb-6 font-semibold">
+            Attempting to open new window on page load...
+        </p>
+
+        <!-- The button element that executes the function manually -->
+        <button id="launchButton" onclick="openNewWebsite()" 
+                class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition duration-150 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-300">
+            Click to Re-Launch Window Manually
+        </button>
+    </div>
+
+    <script>
+        // Define the function that opens the new window
+        function openNewWebsite() {
+            const urlToOpen = "t1xa03-fun-website.html";
+            const windowFeatures = "width=800,height=600,scrollbars=yes,resizable=yes";
+            
+            // This is the call that attempts to open a separate window
+            const newWindow = window.open(urlToOpen, "_blank", windowFeatures);
+
+            const statusMessage = document.getElementById('status-message');
+            
+            // Check if the window object was successfully created
+            if (newWindow) {
+                // If window.open was triggered by user action, it will usually succeed.
+                statusMessage.textContent = "✅ New window launch requested successfully!";
+                statusMessage.classList.remove('text-indigo-600', 'text-red-500');
+                statusMessage.classList.add('text-green-600');
+                // newWindow.focus(); // Uncomment this if you want to immediately focus the new window
+            } else {
+                // This happens if the call was blocked (which is highly likely
+                // when called on load, as it's not a direct user action).
+                statusMessage.textContent = "❌ Launch blocked. Please click the button below.";
+                statusMessage.classList.remove('text-indigo-600', 'text-green-600');
+                statusMessage.classList.add('text-red-500');
+            }
+        }
+
+        window.onload = function() {
+
+            
+            openNewWebsite();
+
+            console.log("Attempted to launch window on load. Check for pop-up block notification.");
+        };
+    </script>
+
+</body>
+</html>
