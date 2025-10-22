@@ -1,66 +1,129 @@
 <html>
-<script src="https://cdn.tailwindcss.com"></script>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#4f46e5',
+                        'secondary': '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f9fb;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        /* Custom styles for better aesthetics */
+        .container-card {
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .container-card:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
-<body class="p-4">
+<body class="bg-gray-50 flex flex-col items-center justify-center min-h-screen p-4 font-sans">
 
-    <div id="main-content" class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full text-center">
-        <h1 class="text-3xl font-bold text-gray-900 mb-4">Window Launch Status</h1>
-        <p id="status-message" class="text-lg text-indigo-600 mb-6 font-semibold">
-            Attempting to open new window on page load...
+    <div id="status-box" class="fixed top-0 left-0 m-4 p-3 rounded-lg text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-300 transition-opacity duration-500">
+        Status: Loaded
+    </div>
+
+    <div class="container-card w-full max-w-xl bg-white p-8 rounded-xl shadow-2xl border-t-4 border-primary">
+        <h1 class="text-3xl font-bold mb-4 text-gray-800">Unload Event Demonstrator</h1>
+        <p class="text-gray-600 mb-6">
+            This page is set up to show you the difference between guaranteed and restricted actions when the user tries to leave.
         </p>
+        
+        <div class="space-y-4">
+            <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p class="font-semibold text-red-700">Action 1 (Blocked): Attempt to Redirect/Open New Window</p>
+                <p class="text-sm text-red-600 mt-1">Modern browsers **will prevent** any redirects (`window.location`) or pop-ups (`window.open`) inside the `beforeunload` and `unload` handlers for security reasons.</p>
+            </div>
+            <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p class="font-semibold text-green-700">Action 2 (Working): Show Confirmation Prompt</p>
+                <p class="text-sm text-green-600 mt-1">The only action guaranteed to work is triggering the browser's native confirmation dialog to let the user decide if they really want to leave (e.g., if data is unsaved).</p>
+            </div>
+        </div>
 
-        <!-- The button element that executes the function manually -->
-        <button id="launchButton" onclick="openNewWebsite()" 
-                class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition duration-150 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-300">
-            Click to Re-Launch Window Manually
+        <button 
+            id="closeButton" 
+            class="mt-8 w-full bg-primary hover:bg-secondary text-white font-bold py-3 rounded-lg transition duration-300 focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-50"
+            onclick="window.close()"
+        >
+            Attempt to Close Page (Triggers 'beforeunload')
         </button>
+
     </div>
 
     <script>
-        // Define the function that opens the new window
-        function openNewWebsite() {
-            const urlToOpen = "t1xa03-fun-website.html";
-            const windowFeatures = "width=800,height=600,scrollbars=yes,resizable=yes";
-            
-            // This is the call that attempts to open a separate window
-            const newWindow = window.open(urlToOpen, "_blank", windowFeatures);
+        // --- Configuration ---
+        const UNSAVED_DATA = true; // Set to true to trigger the working confirmation prompt
 
-            const statusMessage = document.getElementById('status-message');
-            
-            // Check if the window object was successfully created
-            if (newWindow) {
-                // If window.open was triggered by user action, it will usually succeed.
-                statusMessage.textContent = "✅ New window launch requested successfully!";
-                statusMessage.classList.remove('text-indigo-600', 'text-red-500');
-                statusMessage.classList.add('text-green-600');
-                // newWindow.focus(); // Uncomment this if you want to immediately focus the new window
-            } else {
-                // This happens if the call was blocked (which is highly likely
-                // when called on load, as it's not a direct user action).
-                statusMessage.textContent = "❌ Launch blocked. Please click the button below.";
-                statusMessage.classList.remove('text-indigo-600', 'text-green-600');
-                statusMessage.classList.add('text-red-500');
-            }
-        }
+        // Get status element to show what's happening
+        const statusBox = document.getElementById('status-box');
 
-        window.onload = function() {
-
-            
-            openNewWebsite();
-
-            console.log("Attempted to launch window on load. Check for pop-up block notification.");
+        // Helper function to update status
+        const updateStatus = (message, color) => {
+            statusBox.textContent = 'Status: ' + message;
+            statusBox.className = `fixed top-0 left-0 m-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-500 ${color}`;
         };
-    </script>
 
+
+        // ==========================================================
+        // 1. THE BEFOREUNLOAD EVENT HANDLER (Confirmation Prompt)
+        // ==========================================================
+        window.addEventListener('beforeunload', function (e) {
+            updateStatus('BEFORE UNLOAD event fired!', 'bg-yellow-100 text-yellow-800 border border-yellow-300');
+
+            // --- THIS SECTION IS BLOCKED BY BROWSERS ---
+            // If you try to open a new page or redirect here, it will fail.
+            try {
+                // The browser will NOT execute this:
+                // window.open('https://www.google.com', '_blank'); 
+                // window.location.href = 'https://www.google.com';
+                console.log("Attempted to open new window/redirect, but modern browsers blocked it.");
+            } catch (error) {
+                console.error("Redirection attempt failed:", error);
+            }
+            // ------------------------------------------
+
+
+            // --- THIS SECTION IS ALLOWED (The Confirmation Prompt) ---
+            if (UNSAVED_DATA) {
+                // Setting properties on the event object triggers the confirmation dialog.
+                e.preventDefault(); 
+                e.returnValue = ''; // Required for some older browsers/specific contexts
+                
+                // The actual text shown to the user is typically generic 
+                // and controlled by the browser (e.g., "Changes you made may not be saved.")
+                return 'You have unsaved changes. Do you really want to leave?'; 
+            }
+            // --------------------------------------------------------
+
+            // If UNSAVED_DATA is false, the function returns undefined, and the page closes normally.
+        });
+
+
+        // ==========================================================
+        // 2. THE UNLOAD EVENT HANDLER (Cleanup and Reliable Data Send)
+        // ==========================================================
+        window.addEventListener('unload', function () {
+            // Note: This only fires *after* the user confirms they want to leave.
+            updateStatus('UNLOAD event fired (Cleanup)!', 'bg-red-100 text-red-800 border border-red-300');
+
+            // You cannot redirect or open a new window reliably here either.
+            
+            // The only reliable way to send data to a server during unload is using sendBeacon.
+            // navigator.sendBeacon('/api/log_page_close', JSON.stringify({ page: document.title }));
+            
+            console.log("Unload event executed cleanup code.");
+        });
+
+    </script>
 </body>
 </html>
