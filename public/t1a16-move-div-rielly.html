@@ -1,0 +1,212 @@
+<html>
+<head>
+</head>
+<body style="min-height: 100vh; background-color: #f3f4f6; padding: 2rem; font-family: 'Inter', sans-serif;">
+    <h1 style="text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem;">t1a16-move-div-rielly</h1>
+ 
+
+    <script>
+        let myClock02;
+        let autoMoveClock;
+        let keyboardClock;
+
+        const BASE_BUTTON_STYLE = "background-color: #9ca3af; color: white; cursor: not-allowed; margin: 10px; border-radius: 0.5rem; padding: 0.5rem 1rem; border: none; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); transition: all 0.1s ease-in-out; outline: none;";
+        const ACTIVE_BUTTON_STYLE = "background-color: white; color: black; cursor: pointer; margin: 10px; border-radius: 0.5rem; padding: 0.5rem 1rem; border: none; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); transition: all 0.1s ease-in-out; outline: none;";
+
+        function setButtonState(buttonId, isActive) {
+            const btn = document.getElementById(buttonId);
+            if (!btn) return;
+
+            if (isActive) {
+                btn.style.cssText = ACTIVE_BUTTON_STYLE;
+                btn.disabled = false;
+            } else {
+                btn.style.cssText = BASE_BUTTON_STYLE;
+                btn.disabled = true;
+            }
+        }
+
+        let keysPressed = {};
+        const MOVE_STEP = 8;
+        const KEYBOARD_INTERVAL = 20;
+
+        function setupKeyboardMovement() {
+            if (!keyboardClock) {
+                keyboardClock = setInterval(keyboardGameLoop, KEYBOARD_INTERVAL);
+            }
+            
+            document.addEventListener('keydown', (e) => {
+                const key = e.key.toLowerCase();
+                if (['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright'].includes(key)) {
+                    keysPressed[key] = true;
+                    e.preventDefault();
+                    clearInterval(myClock02);
+                    clearInterval(autoMoveClock);
+                    setButtonState('autoRightButton', true);
+                    setButtonState('autoLeftButton', true);
+                    setButtonState('autoDownButton', true);
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                const key = e.key.toLowerCase();
+                if (['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright'].includes(key)) {
+                    keysPressed[key] = false;
+                }
+            });
+        }
+
+        function keyboardGameLoop() {
+            let image = document.getElementById('myImage01');
+            let currentLeft = parseFloat(image.style.left) || 0;
+            let currentTop = parseFloat(image.style.top) || 0;
+            let newLeft = currentLeft;
+            let newTop = currentTop;
+
+            const containerWidth = document.body.clientWidth;
+            const containerHeight = document.body.clientHeight;
+            const imgWidth = image.offsetWidth;
+            const imgHeight = image.offsetHeight;
+
+            let moved = false;
+
+            if (keysPressed['w'] || keysPressed['arrowup']) {
+                newTop -= MOVE_STEP;
+                moved = true;
+            }
+            if (keysPressed['s'] || keysPressed['arrowdown']) {
+                newTop += MOVE_STEP;
+                moved = true;
+            }
+            
+            if (keysPressed['a'] || keysPressed['arrowleft']) {
+                newLeft -= MOVE_STEP;
+                moved = true;
+            }
+            if (keysPressed['d'] || keysPressed['arrowright']) {
+                newLeft += MOVE_STEP;
+                moved = true;
+            }
+
+            if (moved) {
+                newLeft = Math.max(0, newLeft);
+                newLeft = Math.min(containerWidth - imgWidth, newLeft);
+
+                newTop = Math.max(0, newTop);
+                newTop = Math.min(containerHeight - imgHeight - 50, newTop);
+
+                image.style.left = newLeft + 'px';
+                image.style.top = newTop + 'px';
+
+                if ((keysPressed['a'] || keysPressed['arrowleft']) && !(keysPressed['d'] || keysPressed['arrowright'])) {
+                    image.style.transform = 'scaleX(-1)';
+                } else if ((keysPressed['d'] || keysPressed['arrowright']) && !(keysPressed['a'] || keysPressed['arrowleft'])) {
+                    image.style.transform = '';
+                }
+            }
+        }
+
+        function moveRight() {
+            let image = document.getElementById('myImage01');
+            let currentLeft = parseFloat(image.style.left) || 0;
+            let imageRightEdge = currentLeft + image.offsetWidth;
+            let containerWidth = document.body.clientWidth;
+
+            if (imageRightEdge < containerWidth) {
+                image.style.left = currentLeft + 10 + 'px';
+                image.style.transform = '';
+            } else {
+                clearInterval(myClock02);
+                setButtonState('autoLeftButton', true);
+                setButtonState('autoRightButton', false);
+            }
+        }
+
+        function startAutoMoveRight() {
+            document.getElementById('myImage01').style.left = '0px';
+            document.getElementById('myImage01').style.transform = '';
+            clearInterval(autoMoveClock);
+            clearInterval(myClock02);
+            myClock02 = setInterval(moveRight, 30);
+
+            setButtonState('autoRightButton', false);
+            setButtonState('autoLeftButton', false);
+            setButtonState('autoDownButton', false);
+        }
+
+        function moveLeft() {
+            let image = document.getElementById('myImage01');
+            let currentLeft = parseFloat(image.style.left) || 0;
+
+            if (currentLeft > 0) {
+                image.style.left = currentLeft - 10 + 'px';
+                image.style.transform = 'scaleX(-1)';
+            } else {
+                clearInterval(myClock02);
+                setButtonState('autoLeftButton', false);
+                setButtonState('autoRightButton', true);
+                image.style.transform = '';
+            }
+        }
+        
+        function startAutoMoveLeft() {
+            clearInterval(myClock02);
+            clearInterval(autoMoveClock);
+            myClock02 = setInterval(moveLeft, 30);
+            
+            setButtonState('autoLeftButton', false);
+            setButtonState('autoRightButton', false);
+            setButtonState('autoDownButton', false);
+            document.getElementById('myImage01').style.transform = 'scaleX(-1)';
+        }
+
+        function moveDown() {
+            let image = document.getElementById('myImage01');
+            let currentTop = parseFloat(image.style.top) || 0;
+            const maxTop = document.body.clientHeight - image.offsetHeight - 50;
+
+            if (currentTop < maxTop) {
+                image.style.top = currentTop + 10 + 'px';
+            } else {
+                clearInterval(autoMoveClock);
+                setButtonState('autoDownButton', false);
+                setButtonState('autoRightButton', true);
+            }
+        }
+
+        function startAutoMoveDown() {
+            document.getElementById('myImage01').style.top = '0px';
+            clearInterval(myClock02);
+            clearInterval(autoMoveClock);
+            autoMoveClock = setInterval(moveDown, 30);
+            
+            setButtonState('autoDownButton', false);
+            setButtonState('autoRightButton', false);
+            setButtonState('autoLeftButton', false);
+        }
+        
+        window.onload = () => {
+            setButtonState('autoRightButton', true);
+            setButtonState('autoLeftButton', true);
+            setButtonState('autoDownButton', true);
+            
+            setupKeyboardMovement();
+        };
+    </script>
+
+    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <input type="button" id="autoRightButton" value="Auto Move Right" onclick="startAutoMoveRight()"
+            style="background-color: white; color: black; cursor: pointer; margin: 10px; border-radius: 0.5rem; padding: 0.5rem 1rem; border: none; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); transition: all 0.1s ease-in-out; outline: none;">
+
+        <input type="button" id="autoLeftButton" value="Auto Move Left" onclick="startAutoMoveLeft()"
+            style="background-color: white; color: black; cursor: pointer; margin: 10px; border-radius: 0.5rem; padding: 0.5rem 1rem; border: none; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); transition: all 0.1s ease-in-out; outline: none;">
+            
+        <input type="button" id="autoDownButton" value="Auto Move Down" onclick="startAutoMoveDown()"
+            style="background-color: white; color: black; cursor: pointer; margin: 10px; border-radius: 0.5rem; padding: 0.5rem 1rem; border: none; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); transition: all 0.1s ease-in-out; outline: none;">
+    </div>
+    
+    <img id="myImage01" 
+        style="position: relative; width: 100px; height: 80px; top: 0px; left: 0px; transition: transform 0.2s ease-out;" 
+        src="https://th.bing.com/th?id=OIP.onnPhpb9QFqIildOyPBzNAHaEc&w=322&h=193&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2">
+</body>
+</html>
