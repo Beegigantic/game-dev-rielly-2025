@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unified FOMO & Classification Detector</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite"></script>
 
     <style>
         body { 
@@ -211,6 +212,14 @@
 <body>
 
     <script>
+
+            async function runModel() {
+      // Keep the model in a variable
+      const model = await tflite.loadTFLiteModel('./riellys.tflite');
+      console.log('Model loaded:', model);
+    }
+
+    runModel();
         // =================================================================
         // 🚀 DEFAULT CONFIGURATION (FOMO Model)
         // =================================================================
