@@ -219,7 +219,7 @@
             myInputResolution: 240,
             myGridScaleFactor: 8,
             myConfidenceThreshold: 0.5,
-            myClassLabels: ['background', 'Eyes'],
+            myClassLabels: ['01pen', '02pencil'],
             myInputChannels: 3,
             myModelType: 'fomo', // 'fomo' or 'classification'
             myGithubRepoPath: 'hpssjellis/my-examples-of-liteRTjs/main/public/tflite' // user/repo/branch/path
@@ -319,7 +319,7 @@
             
             myLabelEditor = document.createElement('textarea');
             myLabelEditor.id = 'myLabelEditor';
-            myLabelEditor.placeholder = 'Enter labels here (e.g., background, Object1, Object2)';
+            myLabelEditor.placeholder = 'Enter labels here (e.g., 01pen, 02pencil)';
             myLabelEditor.oninput = myUpdateConfigFromLabels;
             myMainContainer.appendChild(myLabelEditor);
 
