@@ -4,8 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite"></script>
 
     <style>
         body { 
@@ -212,14 +210,6 @@
 <body>
 
     <script>
-
-            async function runModel() {
-      // Keep the model in a variable
-      const model = await tflite.loadTFLiteModel('./riellys.tflite');
-      console.log('Model loaded:', model);
-    }
-
-    runModel();
         // =================================================================
         // 🚀 DEFAULT CONFIGURATION (FOMO Model)
         // =================================================================
@@ -229,7 +219,7 @@
             myGridScaleFactor: 8,
             myConfidenceThreshold: 0.5,
             myClassLabels: ['01pen', '02pencil'],
-            myInputChannels: 3,
+            myInputChannels: 2,
             myModelType: 'fomo', // 'fomo' or 'classification'
             myGithubRepoPath: 'Beegigantic/game-dev-rielly-2025/main/public' // user/repo/branch/path
         };
