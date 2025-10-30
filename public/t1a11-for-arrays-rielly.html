@@ -1,29 +1,97 @@
 <script>
-let myArray = new Array()
+    // --- Array Definitions (8 total, including the original) ---
 
-  
+    let myArray1 = ['Fred', 'Mary', 'Zizzy'];          // 1. Original Array (Names)
+    let myArray2 = [10, 20, 30, 40];                   // 2. Array of Numbers (Integers)
+    let myArray3 = [true, false, true, false, true];   // 3. Array of Booleans
+    let myArray4 = ["Apple", 5, null, false];          // 4. Array of Mixed Types
+    let myArray5 = ["Red", "Green", "Blue", "Yellow"]; // 5. Array of Colors (Strings)
+    let myArray6 = ["Mercury", "Venus", "Earth"];      // 6. Array of Planets (Strings)
+    let myArray7 = ["Banana", "Grapefruit", "Kiwi", "Orange", "Lime"];   // 7. Array of Fruits (Strings) - Added length for testing
+    let myArray8 = [2022, 2023, 2024, 2025];           // 8. Array of Years (Numbers)
+    
+    // Helper function to format and display a single array with a specific item limit
+    function formatArray(name, arr, maxCount) {
+        // Determine the actual number of elements to show (min of array length or user's maxCount)
+        const limit = Math.min(arr.length, maxCount);
 
-  myArray[0] = 'Fred'
-  myArray[1] = 'Mary'
-  myArray[2] = 'Zizzy'
+        let output = `<h3>${name} (Total Length: ${arr.length} | Displaying: ${limit})</h3>`;
+        output += `<div>`;
+        
+        let items = [];
+        // Loop only up to the calculated limit
+        for (let index = 0; index < limit; index++) {
+            let item = arr[index];
+            let type = typeof item;
+            // Handle null/undefined for clearer display
+            let displayItem = item === null ? 'NULL' : (item === undefined ? 'UNDEFINED' : String(item));
+
+            items.push(`Array[${index}]: ${displayItem} (Type: ${type})<br>`);
+        }
+
+        output += items.join('');
+
+        // Add a message if the display was truncated
+        if (limit < arr.length) {
+            output += `... (Display truncated at ${limit} entries) ...<br>`;
+        }
+        
+        output += `<hr style="margin-top: 10px; margin-bottom: 10px;">`; // Simple horizontal rule for separation
+        return output;
+    }
+
+    // Main function called by the button
+    function displayAllArrays() {
+        const outputDiv = document.getElementById('myDiv01');
+        outputDiv.innerHTML = ''; // Clear previous content
+
+        // 1. Get the desired max count from the input field
+        const maxCountInput = document.getElementById('myText01').value;
+        const maxCount = parseInt(maxCountInput, 10);
+        
+        // Use the parsed number, defaulting to a high number (99) if invalid or negative
+        const validMaxCount = (isNaN(maxCount) || maxCount < 0) ? 99 : maxCount;
+
+
+        // 2. Assemble the HTML for all 8 arrays, passing the validMaxCount
+        let allOutput = `
+            <h2>8 Different Arrays Demonstrated (Max Items: ${validMaxCount})</h2>
+            ${formatArray('1. Names (Original)', myArray1, validMaxCount)}
+            ${formatArray('2. Integers', myArray2, validMaxCount)}
+            ${formatArray('3. Booleans (True/False)', myArray3, validMaxCount)}
+            ${formatArray('4. Mixed Types', myArray4, validMaxCount)}
+            ${formatArray('5. Colors', myArray5, validMaxCount)}
+            ${formatArray('6. Planets', myArray6, validMaxCount)}
+            ${formatArray('7. Fruits', myArray7, validMaxCount)}
+            ${formatArray('8. Recent Years', myArray8, validMaxCount)}
+        `;
+        
+        outputDiv.innerHTML = allOutput;
+    }
+
+    // Boilerplate variables remain in the script block but are unused for this simple local demo
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
 </script>
 
-<h2 align=center>t1a11 for arrays Rielly</h2>
 
-Max Array Entry: <input type=text id="myText01" value="3"><br>
+<div style="padding: 20px;">
+    <h2>t1a11 for arrays Rielly</h2>
 
-<input type=button value="Example onClick" onClick="{
-    let myMax = document.getElementById('myText01').value
-  let mySum = ''
-  document.getElementById('myDiv01').innerHTML = ' '
+    <!-- The input field already has a default value="3" -->
+    Max Array Entry: <input type="text" id="myText01" value="3"><br><br>
 
-  for (let myLoop=0; myLoop < myMax; myLoop++){
-    mySum += 'Loop #:' + myLoop + ' array entry: ' + myArray[myLoop] + '<br>'
-  }
-  document.getElementById('myDiv01').innerHTML = mySum
-  }">
+    <input 
+        type="button" 
+        value="Demonstrate All 8 Arrays" 
+        onClick="displayAllArrays()"
+    >
 
-  <div id="myDiv01">...</div>
+    <br><br>
+    
+    <div id="myDiv01" style="border: 1px solid black; padding: 10px; min-height: 200px;">
+        Click the button above to view all 8 arrays and their contents...
+    </div>
 
-  <br>
-  You do at least 7 other arrays: <br>
+</div>
