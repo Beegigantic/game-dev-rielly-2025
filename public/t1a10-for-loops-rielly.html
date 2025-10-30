@@ -1,21 +1,100 @@
-<h2 align=center>t1a10 for loops</h2>
+<h2 align=center>t1a10 For Loops and Cool Functions</h2>
 
-<input id="myNum01" type=number value="4"><br>
+<!-- ============================================== -->
+<!-- Example 1: Original Loop with Conditional Text -->
+<!-- ============================================== -->
+<h3>1. Original Loop (Index Check)</h3>
+<p>Loop from 0 to 9, adding "third" when index is 3.</p>
 
-<input type=button value="myEvent Loop" onclick="{
-  let myTemp = ' ' 
-  document.getElementById('myDiv01').innerHTML = ' '
-  for (x=0; x<10; x++){
+<input id="myNum01" type=number value="4">
 
-  if (x == 3){
-    myTemp += x + ' third <br>'
-  } else {
-    myTemp += x + '<br>'
-  }
-  }
-  document.getElementById('myDiv01').innerHTML = myTemp
+<input type=button value="Run Index Check Loop" onclick="{
+  let myTemp = '' 
+  document.getElementById('myDiv01').innerHTML = ''
+  for (x=0; x<10; x++){
+    if (x == 3){
+      myTemp += x + ' <span style=\'font-weight: bold; color: red;\'>third</span><br>'
+    } else {
+      myTemp += x + '<br>'
+    }
+  }
+  document.getElementById('myDiv01').innerHTML = myTemp
 }"><br>
 
-
 <div id="myDiv01">...</div>
+
+<hr>
+
+<!-- ============================================== -->
+<!-- Example 2: Factorial Calculation -->
+<!-- ============================================== -->
+<h3>2. Factorial Calculation Loop</h3>
+<p>Calculates the factorial (n!) of the number entered.</p>
+
+<label for="myNum02">Enter N (max 10):</label>
+<input id="myNum02" type=number value="5" min="0" max="10">
+
+<input type=button value="Calculate Factorial (N!)" onclick="{
+  const num = parseInt(document.getElementById('myNum02').value);
+  let result = 1;
+  let calculationString = '';
+
+  if (isNaN(num) || num < 0 || num > 10) {
+    document.getElementById('myDiv02').innerHTML = '<span style=\'color: red;\'>Please enter a number between 0 and 10.</span>';
+    return;
+  }
+
+  if (num === 0) {
+    calculationString = '0! = 1 (by definition)';
+  } else {
+    // The loop performs the cumulative multiplication
+    for (let i = 1; i <= num; i++) {
+      result *= i;
+      calculationString += i;
+      if (i < num) {
+        calculationString += ' × ';
+      }
+    }
+    calculationString += ' = ' + result;
+  }
+
+  document.getElementById('myDiv02').innerHTML = 
+    '<span style=\'font-weight: bold;\'>' + num + '! Factorial:</span> ' + calculationString;
+
+}"><br>
+
+<div id="myDiv02">...</div>
+
+<hr>
+
+<!-- ============================================== -->
+<!-- Example 3: Dynamic Style Generation (Rainbow) -->
+<!-- ============================================== -->
+<h3>3. Dynamic Rainbow Pattern Loop</h3>
+<p>Loops 12 times, using inline style to change the color based on the index.</p>
+
+<input type=button value="Generate Rainbow Text" onclick="{
+  let myTemp = '';
+  document.getElementById('myDiv03').innerHTML = '';
+  
+  // Define colors for a rainbow effect
+  const colors = ['#EF4444', '#F97316', '#FACC15', '#10B981', '#3B82F6', '#6366F1', '#A855F7', '#EC4899'];
+  const loopCount = 12;
+
+  // Loop and apply a different inline style color using the modulo operator (%)
+  for (let x = 0; x < loopCount; x++) {
+    const colorIndex = x % colors.length;
+    const color = colors[colorIndex];
+    
+    // Generate a span with inline color style
+    myTemp += '<span style=\'color: ' + color + '; font-size: ' + (14 + x) + 'px; font-weight: bold;\'>';
+    myTemp += 'Index ' + x + ' ';
+    myTemp += '</span>';
+  }
+  
+  document.getElementById('myDiv03').innerHTML = myTemp;
+
+}"><br>
+
+<div id="myDiv03">...</div>
 
