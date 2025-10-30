@@ -1,42 +1,277 @@
-<script>
-class myAnimal {
-    constructor(passName, passAge) {
-        this.myName = passName;
-        this.myAge = passAge;
-    }
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abstract System Node Hierarchy - Generic</title>
+    <!-- Removed Tailwind CSS for a generic look -->
+    <style>
+        /* Minimal styling to just contain content */
+        body {
+            font-family: monospace;
+            padding: 20px;
+        }
+        .container {
+            width: 800px;
+            margin: 0 auto;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        .section {
+            border: 1px dashed gray;
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+    </style>
+    <script>
+        // Use global variables for demonstration purposes
+        let myUnitA = null;
+        let myUnitB = null;
 
-  myShow(){
-    document.getElementById('myDiv01').innerHTML = 'Hello ' + this.myName+'<br>'
-  }
-} 
-</script>
+        // --- 1. Base Class: SystemNode (The most abstract container) ---
+        class SystemNode {
+            // Static property for class-level utility
+            static totalNodesInitialized = 0;
 
-<h2 align=center>t1a13-extend-class-rielly</h2>
+            // Private field for encapsulation (using # is a modern JS feature)
+            #mode;
 
-<h4> Example Working Classes code</h4>
+            constructor(name, identifier, descriptor, parameter) {
+                this.name = name;
+                this.identifier = identifier; // Generic ID, Version, or Index
+                this.descriptor = descriptor; // Generic Type, Category, or Function
+                this.parameter = parameter; // Core focus or resource requirement
+                this.#mode = 'Uninitialized'; // Initial internal mode
+                SystemNode.totalNodesInitialized++;
+            }
 
-<input type=button value="Example Class Set and Show Class Animal" onClick="{
+            // Public method to access and modify the private state
+            setMode(action) {
+                if (action === 'Deploy') {
+                    this.#mode = 'Active';
+                    return `${this.name} reports mode change to Active. (Mode: ${this.#mode})`;
+                } else if (action === 'Suspend') {
+                    this.#mode = 'Suspended';
+                    return `${this.name} is entering suspension state. (Mode: ${this.#mode})`;
+                }
+                return `${this.name} remains in ${this.#mode} mode.`;
+            }
 
-    myDog = new myAnimal('Snickers', 5)
-    myDog.myShow()
+            // Base Method (Polymorphism target)
+            transmitData() {
+                return "Node transmits a standardized, low-level data packet.";
+            }
 
-  }">
+            // Base Method for detailed report
+            queryStatus() {
+                return `${this.name} [ID: ${this.identifier}] is a ${this.descriptor} node, managed by parameter ${this.parameter}. Current mode: ${this.#mode}.`;
+            }
 
-  <h4> Example Extending Class Code</h4>
+            // Static method belongs to the Class, not an instance
+            static getReport() {
+                return `Total SystemNode instances initialized: ${SystemNode.totalNodesInitialized}`;
+            }
+        }
 
-  Nothing: <input type=text id="myText01" value="Useless at the moment"><br>
+        // --- 2. Subclass 1: ProcessorA (Flexible, self-adjusting component) ---
+        class ProcessorA extends SystemNode {
+            constructor(name, identifier) {
+                // Calls the parent constructor with generic values
+                super(name, identifier, 'Flexible Unit', 'Adaptability Score');
+                this.isSynchronized = false;
+            }
 
-  <input type=button value="Example Extend Class Animal" onClick="{
+            // Polymorphism: Overrides the parent method for specific data transmission
+            transmitData() {
+                return `${this.name} is transmitting data with a required ${this.parameter} level.`;
+            }
 
-    class myCat extends myAnimal {
+            // New specialized method
+            optimizeFlow() {
+                this.isSynchronized = true;
+                return `${this.name}: Optimizing data flow. Synchronization established.`;
+            }
+        }
 
-    myShow(){
-      document.getElementById('myDiv01').innerHTML = this.myName + ' is a great cat<br>'
-      }
-    }
+        // --- 3. Subclass 2: ProcessorB (Structured, sequential component) ---
+        class ProcessorB extends SystemNode {
+            static #sequenceCount = 0;
 
-    myPet = new myCat('Fluffy', 14)
-    myPet.myShow()
+            constructor(model, version) {
+                // Initialize parent with generic values
+                super(model, version, 'Sequential Unit', 'Control Vector');
+                ProcessorB.#sequenceCount++;
+                this.name = `${model}_${version}`; // Combine inputs into a generic name
+            }
 
-    }">
-    <div id="myDiv01">...</div>
+            // Polymorphism: Overrides the parent method for specific data transmission
+            transmitData() {
+                return `[ERR: 401] ${this.name} is awaiting input before transmitting. Sequence required.`;
+            }
+
+            // New specialized method
+            initiateSequence() {
+                // Accessing a base class method to show mode change
+                this.setMode('Deploy'); 
+                return `Initiating Sequence ${ProcessorB.#sequenceCount}. Deployment confirmed for ${this.name}.`;
+            }
+
+            // Static method unique to ProcessorB, using a private static field
+            static getDeploymentStatus() {
+                return `There are ${ProcessorB.#sequenceCount} specialized ProcessorB units deployed.`;
+            }
+        }
+
+        // --- Demo Functions ---
+
+        function setupUnitA() {
+            myUnitA = new ProcessorA('LogicGate', '001');
+            document.getElementById('display-name').textContent = myUnitA.name;
+            document.getElementById('display-status').innerHTML = myUnitA.queryStatus();
+            document.getElementById('output').textContent = `ProcessorA instance created: ${myUnitA.name}`;
+        }
+
+        function setupUnitB() {
+            myUnitB = new ProcessorB('Core_Unit', 'v1.1');
+            document.getElementById('display-name').textContent = myUnitB.name;
+            document.getElementById('display-status').innerHTML = myUnitB.queryStatus();
+            document.getElementById('output').textContent = `ProcessorB instance created: ${myUnitB.name}`;
+        }
+
+        function runAction(instanceName, action) {
+            const instance = instanceName === 'A' ? myUnitA : myUnitB;
+            if (!instance) {
+                document.getElementById('output').textContent = `Please initialize ${instanceName === 'A' ? 'ProcessorA' : 'ProcessorB'} first.`;
+                return;
+            }
+
+            let result = '';
+            switch(action) {
+                case 'data':
+                    result = instance.transmitData();
+                    break;
+                case 'status':
+                    result = instance.queryStatus();
+                    break;
+                case 'deploy':
+                    result = instance.setMode('Deploy');
+                    break;
+                case 'suspend':
+                    result = instance.setMode('Suspend');
+                    break;
+                case 'optimize': // Specialized action for ProcessorA
+                    if (instance instanceof ProcessorA) {
+                        result = instance.optimizeFlow();
+                    } else {
+                        result = `${instance.name} is type B and requires sequencing.`;
+                    }
+                    break;
+                case 'initiate': // Specialized action for ProcessorB
+                    if (instance instanceof ProcessorB) {
+                        result = instance.initiateSequence();
+                    } else {
+                        result = `${instance.name} is type A and requires flow optimization.`;
+                    }
+                    break;
+            }
+            document.getElementById('output').textContent = result;
+            document.getElementById('display-status').innerHTML = instance.queryStatus();
+        }
+
+        function showStatic() {
+             const baseReport = SystemNode.getReport();
+             const processorBReport = typeof ProcessorB !== 'undefined' ? ProcessorB.getDeploymentStatus() : 'B Unit Count Unavailable.';
+             const report = baseReport + '. ' + processorBReport;
+             document.getElementById('output').textContent = report;
+        }
+
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Abstract System Node Hierarchy</h1>
+        <h2>Generic Interface Demo</h2>
+
+        <div class="section" style="float: left; width: 45%;">
+            <h3>Current Node Configuration</h3>
+            <p>
+                <b>Name:</b> <span id="display-name">-- No Node Selected --</span>
+            </p>
+            <div id="display-status" style="border: 1px solid #ccc; padding: 5px;">
+                Initialize a node instance to view its parameters and mode here.
+            </div>
+        </div>
+
+        <div class="section" style="float: right; width: 45%;">
+            <h3>System Metrics (Static Demo)</h3>
+            <p>Static methods track global system data.</p>
+            <button onclick="showStatic()">
+                Query Global Initialization Report
+            </button>
+        </div>
+
+        <div style="clear: both;"></div>
+        <hr>
+
+        <div class="section">
+            <h2>System Node Control Panel</h2>
+            
+            <div style="display: flex; justify-content: space-around; gap: 10px;">
+                
+                <!-- 1. Create Instances -->
+                <div style="border: 1px solid blue; padding: 10px; flex: 1;">
+                    <h3>1. Initialize Nodes</h3>
+                    <button onclick="setupUnitA()" style="width: 100%; margin-bottom: 5px;">
+                        Initialize Processor A
+                    </button>
+                    <button onclick="setupUnitB()" style="width: 100%;">
+                        Initialize Processor B
+                    </button>
+                </div>
+
+                <!-- 2. Common Methods -->
+                <div style="border: 1px solid green; padding: 10px; flex: 1;">
+                    <h3>2. Base Commands</h3>
+                    <button onclick="runAction('A', 'data')" style="width: 100%; margin-bottom: 5px;">
+                        Node A: Transmit Data
+                    </button>
+                    <button onclick="runAction('B', 'data')" style="width: 100%; margin-bottom: 5px;">
+                        Node B: Transmit Data
+                    </button>
+                    <button onclick="runAction('A', 'deploy')" style="width: 100%; margin-bottom: 5px;">
+                        Set Mode: Deploy
+                    </button>
+                    <button onclick="runAction('A', 'suspend')" style="width: 100%;">
+                        Set Mode: Suspend
+                    </button>
+                </div>
+
+                <!-- 3. Specialized Methods -->
+                <div style="border: 1px solid red; padding: 10px; flex: 1;">
+                    <h3>3. Specialized Routines</h3>
+                    <button onclick="runAction('A', 'optimize')" style="width: 100%; margin-bottom: 5px;">
+                        Processor A: Optimize Flow
+                    </button>
+                    <button onclick="runAction('B', 'initiate')" style="width: 100%;">
+                        Processor B: Initiate Sequence
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Output Display -->
+        <div class="section" style="background-color: #eee; border: 2px solid black;">
+            <h3>Output Console</h3>
+            <div id="output" style="font-size: 1.1em;">
+                Awaiting node initialization...
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
+
