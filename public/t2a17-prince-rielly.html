@@ -1,1 +1,285 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Path Animator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        #path-container {
+            position: relative;
+            width: 80vw;
+            max-width: 600px;
+            height: 400px;
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+            overflow: hidden;
+        }
+        /* Generic styles for dynamic elements */
+        .moving-object {
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        .path-point {
+            position: absolute;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+        .path-trail {
+            position: absolute;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        #path-line {
+            display: none;
+        }
 
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4"> 
+
+    <div id="path-container" class="rounded-xl">
+        <svg id="path-line"></svg>
+        </div>
+
+    <script>
+        // --- CONFIGURATION: DEFINE ALL MOVING OBJECTS AND THEIR PATHS HERE ---
+        const ANIMATORS_CONFIG = [
+            {
+                id: 'dot-crown',
+                path: [
+                    { x: 10, y: 90 },
+                    { x: 20, y: 30 },
+                    { x: 30, y: 70 },
+                    { x: 45, y: 20 },
+                    { x: 55, y: 20 },
+                    { x: 70, y: 70 },
+                    { x: 80, y: 30 },
+                    { x: 90, y: 90 },
+                ],
+                speed: 0.100, // Very fast
+                dotColor: 'black',
+                dotSize: '12px',
+                pointColor: 'black',
+                trailColor: '#a8a8a8',
+                trailSize: '4px',
+                trailDropInterval: 20,
+            },
+            {
+                id: 'dot-triangle',
+                path: [
+                    { x: 50, y: 10 },
+                    { x: 95, y: 90 },
+                    { x: 5, y: 90 }
+                ],
+                speed: 0.150, // Slower speed
+                dotColor: 'blue',
+                dotSize: '15px',
+                pointColor: 'blue',
+                trailColor: 'lightblue',
+                trailSize: '5px',
+                trailDropInterval: 30,
+            },
+            // Add a third dot (e.g., a square path)
+            {
+                id: 'dot-square',
+                path: [
+                    { x: 10, y: 10 },
+                    { x: 90, y: 10 },
+                    { x: 90, y: 90 },
+                    { x: 10, y: 90 },
+                ],
+                speed: 0.160, // Medium speed
+                dotColor: 'green',
+                dotSize: '8px',
+                pointColor: 'green',
+                trailColor: '#78c287',
+                trailSize: '3px',
+                trailDropInterval: 15,
+            }
+        ];
+
+        // --- CORE LOGIC ---
+
+        const container = document.getElementById('path-container');
+        let allAnimators = [];
+        let lastTimestamp = 0;
+
+        function distance(p1, p2) {
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function lerp(start, end, t) {
+            return {
+                x: start.x + (end.x - start.x) * t,
+                y: start.y + (end.y - start.y) * t,
+            };
+        }
+
+        function calculateSegmentDuration(p1, p2, speed) {
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            const dist = distance(p1, p2); 
+            const scaleFactor = (containerWidth + containerHeight) / 200;
+            const actualPixelDistance = dist * scaleFactor;
+            return actualPixelDistance / speed;
+        }
+
+        function updateObjectPosition(animator, pos) {
+            const xPixel = pos.x * (container.clientWidth / 100);
+            const yPixel = pos.y * (container.clientHeight / 100);
+            animator.objectElement.style.transform = `translate(${xPixel}px, ${yPixel}px) translate(-50%, -50%)`;
+        }
+
+        function dropTrailDot(animator, pos) {
+            const trailDot = document.createElement('div');
+            trailDot.className = 'path-trail';
+            trailDot.style.left = `${pos.x}%`;
+            trailDot.style.top = `${pos.y}%`;
+            trailDot.style.backgroundColor = animator.config.trailColor;
+            trailDot.style.width = animator.config.trailSize;
+            trailDot.style.height = animator.config.trailSize;
+            container.appendChild(trailDot);
+        }
+        
+        // --- ANIMATOR OBJECT FACTORY ---
+
+        function createAnimator(config) {
+            // 1. Create moving object element
+            const objectElement = document.createElement('div');
+            objectElement.className = 'moving-object';
+            objectElement.id = config.id;
+            objectElement.style.backgroundColor = config.dotColor;
+            objectElement.style.width = config.dotSize;
+            objectElement.style.height = config.dotSize;
+            container.appendChild(objectElement);
+            
+            // 2. Add path points
+            config.path.forEach(p => {
+                const marker = document.createElement('div');
+                marker.className = 'path-point';
+                marker.style.left = `${p.x}%`;
+                marker.style.top = `${p.y}%`;
+                marker.style.backgroundColor = config.pointColor;
+                marker.style.width = '8px';
+                marker.style.height = '8px';
+                container.appendChild(marker);
+            });
+
+            // 3. Initialize state
+            const animator = {
+                config,
+                objectElement,
+                currentPointIndex: 0,
+                segmentProgress: 0,
+                currentSegmentDuration: 0,
+                lastTrailDrop: 0
+            };
+
+            // 4. Set initial position and duration
+            if (config.path.length > 1) {
+                animator.currentSegmentDuration = calculateSegmentDuration(config.path[0], config.path[1], config.speed);
+            }
+            updateObjectPosition(animator, config.path[0]);
+            dropTrailDot(animator, config.path[0]);
+            
+            return animator;
+        }
+
+        // --- ANIMATION STEP ---
+
+        function updateAnimator(animator, deltaTime, timestamp) {
+            const config = animator.config;
+
+            if (config.path.length < 2) {
+                return;
+            }
+
+            const progressStep = deltaTime / animator.currentSegmentDuration;
+            animator.segmentProgress += progressStep;
+
+            let startPoint = config.path[animator.currentPointIndex]; 
+            let nextPointIndex = (animator.currentPointIndex + 1) % config.path.length;
+            let endPoint = config.path[nextPointIndex];
+
+            if (animator.segmentProgress >= 1) {
+                animator.currentPointIndex = nextPointIndex;
+                animator.segmentProgress = 0; 
+
+                nextPointIndex = (animator.currentPointIndex + 1) % config.path.length;
+                startPoint = config.path[animator.currentPointIndex]; 
+                endPoint = config.path[nextPointIndex];
+
+                animator.currentSegmentDuration = calculateSegmentDuration(startPoint, endPoint, config.speed);
+
+                if (animator.currentPointIndex === config.path.length - 1) {
+                    nextPointIndex = 0;
+                    endPoint = config.path[0];
+                    animator.currentSegmentDuration = calculateSegmentDuration(config.path[config.path.length - 1], config.path[0], config.speed);
+                }
+            }
+
+            const currentPos = lerp(startPoint, endPoint, animator.segmentProgress);
+            updateObjectPosition(animator, currentPos);
+
+            if (timestamp - animator.lastTrailDrop > config.trailDropInterval) {
+                dropTrailDot(animator, currentPos);
+                animator.lastTrailDrop = timestamp;
+            }
+        }
+
+
+        // --- MAIN INITIALIZATION & LOOP ---
+
+        function initializeAnimators() {
+            // Remove existing trail dots (markers are re-added per animator)
+            document.querySelectorAll('.path-trail').forEach(trail => trail.remove());
+            document.querySelectorAll('.path-point').forEach(marker => marker.remove());
+            document.querySelectorAll('.moving-object').forEach(obj => obj.remove());
+
+            allAnimators = ANIMATORS_CONFIG.map(createAnimator);
+        }
+
+        function animate(timestamp) {
+            if (!lastTimestamp) {
+                lastTimestamp = timestamp;
+            }
+
+            const deltaTime = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+
+            allAnimators.forEach(animator => {
+                updateAnimator(animator, deltaTime, timestamp);
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- Event Listeners and Execution ---
+
+        window.onload = function() {
+            initializeAnimators();
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+             // Re-initialize all animators on resize to correctly calculate pixel distances
+             initializeAnimators();
+        });
+
+    </script>
+</body>
+</html>
