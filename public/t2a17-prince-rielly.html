@@ -1,7 +1,5 @@
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Path Animator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -62,19 +60,18 @@
                     { x: 10, y: 90 },
                     { x: 20, y: 30 },
                     { x: 30, y: 70 },
-                    { x: 45, y: 20 },
-                    { x: 55, y: 20 },
+                    { x: 50, y: 20 },
                     { x: 70, y: 70 },
                     { x: 80, y: 30 },
                     { x: 90, y: 90 },
                 ],
-                speed: 0.100, // Very fast
+                speed: 0.200, // Very fast
                 dotColor: 'black',
                 dotSize: '12px',
                 pointColor: 'black',
                 trailColor: '#a8a8a8',
                 trailSize: '4px',
-                trailDropInterval: 20,
+                trailDropInterval: 10,
             },
             {
                 id: 'dot-triangle',
@@ -90,17 +87,41 @@
                     { x: 48, y: 49 },
                     { x: 48, y: 29 },
                     { x: 40, y: 29 },
-                    { x: 30, y: 49 },
-                    { x: 30, y: 59 },
-                    { x: 35, y: 59 }
+                    { x: 30, y: 44 },
+                    { x: 30, y: 54 },
+                    { x: 35, y: 54 },
+		            { x: 33, y: 49 },
+		            { x: 37, y: 54 },
+		            { x: 29, y: 56 },
+                    { x: 28, y: 44 },
+                    { x: 30, y: 30 },
+                    { x: 45, y: 24 },
+                    { x: 40, y: 14 },
+                     { x: 50, y: 0 },
+                    { x: 60, y: 14 },
+                    { x: 55, y: 24 },
+                    { x: 70, y: 22 },
+                    { x: 75, y: 19 },
+                    { x: 75, y: 40 },
+                    { x: 70, y: 35 },
+                    { x: 52, y: 29 },
+                    { x: 52, y: 29 },
+                    { x: 52, y: 49 },
+                    { x: 54, y: 49 },
+                    { x: 56, y: 47 },
+                    { x: 56, y: 57 },
+                    { x: 54, y: 55 },
+                    { x: 52, y: 55 },
+                    { x: 52, y: 75 },
+                    { x: 55, y: 70 },
                 ],
-                speed: 0.150, // Slower speed
+                speed: 0.280, // Slower speed
                 dotColor: 'purple',
                 dotSize: '15px',
                 pointColor: 'purple',
                 trailColor: 'purple',
                 trailSize: '5px',
-                trailDropInterval: 30,
+                trailDropInterval: 6,
             },
             // Add a third dot (e.g., a square path)
             {
@@ -111,13 +132,13 @@
                     { x: 90, y: 90 },
                     { x: 10, y: 90 },
                 ],
-                speed: 0.160, // Medium speed
+                speed: 0.260, // Medium speed
                 dotColor: 'green',
                 dotSize: '8px',
                 pointColor: 'green',
                 trailColor: '#78c287',
                 trailSize: '3px',
-                trailDropInterval: 15,
+                trailDropInterval: 10,
             }
         ];
 
