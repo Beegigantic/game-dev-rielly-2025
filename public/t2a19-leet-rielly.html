@@ -9,18 +9,49 @@
 
 
 <ol>
-<br><br><li> Show your prompt here
+<br><br><li> can you make me a beginner friendly javascript leet code question?
   
-<br><br><li> Show the Leet question here
+<br><br><li> Given an array of numbers, return the second largest number in the array. If the array has fewer than two unique numbers, return null.
 
 <br><br><li> Within PRE tags show your version of the leet answer without looking at the actual answer. <br>
 
 <pre>
-This code is in the pre tag
-  it save spaces and linebreaks
-    For example this is shifted in
+take the array go through it checking the biggest number found with the next number and if its
+  bigger you keep that one and put the second largest in the second spot
+    going through a loop you have the biggest number but you might not have
+      the second largest. To get it you then check the second largest with every number except the largest one.
+        This will give you the second largest then you print it.
   
 </pre>
 
-  <br><br><li> Put the chatGPT working code here. (sensibly, it does not need several tags that are not used)
+<input id="numbers" type="text" placeholder="Enter numbers separated by commas">
+    <button onclick="showResult()">Find</button>
+    <p>Second Largest: <span id="result"></span></p>
+
+    <script>
+      function secondLargest(arr) {
+        if (arr.length < 2) return null;
+
+        let largest = -Infinity;
+        let second = -Infinity;
+
+        for (let num of arr) {
+          if (num > largest) {
+            second = largest;
+            largest = num;
+          } else if (num > second && num < largest) {
+            second = num;
+          }
+        }
+
+        return second === -Infinity ? null : second;
+      }
+
+      function showResult() {
+        const input = document.getElementById("numbers").value;
+        const arr = input.split(",").map(x => Number(x.trim())).filter(x => !isNaN(x));
+        const result = secondLargest(arr);
+        document.getElementById("result").textContent = result;
+      }
+    </script>
   </oi>
