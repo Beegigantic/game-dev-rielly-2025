@@ -1,0 +1,17 @@
+<canvas id="myCanvas" width="400" height="900"></canvas>
+<script>
+  const canvas = document.getElementById('myCanvas');
+  const myMax = 5;
+  const myArray = [6, 7, 5, 2, 8];
+  if (canvas.getContext) {
+     const ctx = canvas.getContext('2d');
+     ctx.fillStyle = '#1e3a8a'; 
+
+     for (i=0; i<5; i++){
+        ctx.fillRect(50+(i*7), 500, 5, -1*myArray[i]*50); 
+     }
+
+  }  else {
+     console.error("Canvas is not supported in this browser.");
+}
+</script>
