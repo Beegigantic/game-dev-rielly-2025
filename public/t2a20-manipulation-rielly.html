@@ -3,7 +3,7 @@
 String, Array, Object manipulation methods<br>
 
 <input id="myNum01" type=text value="This is a string" ><br>
-<span id="mySpen01">...</span><br>
+<span id="mySpan01">...</span><br>
 
 <input type=button value=".toUpperCase()" onclick="{
     let myIn = document.getElementById('myNum01').value
@@ -15,12 +15,12 @@ String, Array, Object manipulation methods<br>
        document.getElementById('mySpan01').innerHTML = myIn.split(' ')
   }"><br>
 
-  <input type=button alue="Object.keys() returns array" onclick="{
+  <input type=button value="Object.keys() returns array" onclick="{
       let myObject = {
-          first: 10
+          first: 10,
           second: 'Hello',
           third: true
       }
     let keyArray = Object.keys(myObject)
-    document.GetElementById('mySpan01').innerHTML = keyArray
+    document.getElementById('mySpan01').innerHTML = keyArray
     }"><br>
