@@ -144,7 +144,7 @@ String, Array, Object manipulation methods<br>
 Array (comma separated): <input id="arrayInput" type="text" value="10,20,30,40,50"><br>
 Condition / Function: <input id="conditionInput" type="text" value="x > 25"><br>
 <span id="mySpan02">...</span><br>
-<p id="explanation">Click a button to run a method using the array and condition above.</p><br>
+<p id="explanation2">Click a button to run a method using the array and condition above.</p><br>
 
 <input type=button value=".map()" onclick="{
   let arr = document.getElementById('arrayInput').value.split(',').map(Number)
@@ -152,7 +152,7 @@ Condition / Function: <input id="conditionInput" type="text" value="x > 25"><br>
   try {
     let mapped = arr.map(x => eval(funcBody))
     document.getElementById('mySpan02').innerHTML = mapped.join(', ')
-    document.getElementById('explanation').innerHTML = 
+    document.getElementById('explanation2').innerHTML = 
       'Original Array: [' + arr.join(', ') + ']<br>' +
       'Mapping Function: ' + funcBody + '<br>' +
       'Result: [' + mapped.join(', ') + ']<br><br>' +
@@ -169,7 +169,7 @@ Condition / Function: <input id="conditionInput" type="text" value="x > 25"><br>
   try {
     let filtered = arr.filter(x => eval(condition))
     document.getElementById('mySpan02').innerHTML = filtered.join(', ')
-    document.getElementById('explanation').innerHTML = 
+    document.getElementById('explanation2').innerHTML = 
       'Original Array: [' + arr.join(', ') + ']<br>' +
       'Filter Condition: ' + condition + '<br>' +
       'Result: [' + filtered.join(', ') + ']<br><br>' +
@@ -186,7 +186,7 @@ Condition / Function: <input id="conditionInput" type="text" value="x > 25"><br>
   try {
     let found = arr.find(x => eval(condition))
     document.getElementById('mySpan02').innerHTML = found
-    document.getElementById('explanation').innerHTML = 
+    document.getElementById('explanation2').innerHTML = 
       'Original Array: [' + arr.join(', ') + ']<br>' +
       'Find Condition: ' + condition + '<br>' +
       'Result: ' + found + '<br><br>' +
