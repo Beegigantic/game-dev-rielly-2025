@@ -90,26 +90,51 @@ String, Array, Object manipulation methods<br>
   let myArray = [1, 2, 3, 4]
   let doubled = myArray.map(x => x * 2)
   document.getElementById('mySpan01').innerHTML = doubled.join(', ')
-  document.getElementById('explanation').innerHTML = '.map() creates a new array by applying a function to every element of the original array.'
+  document.getElementById('explanation').innerHTML = 
+  'Original Array: [1, 2, 3, 4]<br>' +
+  'Operation: myArray.map(x => x * 2)<br>' +
+  'Result: [2, 4, 6, 8]<br><br>' +
+  'Explanation:<br>' +
+  '.map() loops through each element of an array, applies a function to it, and returns a new array without modifying the original. ' +
+  'In this case, each number is multiplied by 2.'
 }"><br>
 
 <input type=button value=".filter()" onclick="{
   let myArray = [5, 10, 15, 20, 25]
   let filtered = myArray.filter(x => x > 10)
   document.getElementById('mySpan01').innerHTML = filtered.join(', ')
-  document.getElementById('explanation').innerHTML = '.filter() creates a new array containing only elements that satisfy a specified condition.'
+  document.getElementById('explanation').innerHTML = 
+  'Original Array: [5, 10, 15, 20, 25]<br>' +
+  'Condition: x > 10<br>' +
+  'Result: [15, 20, 25]<br><br>' +
+  'Explanation:<br>' +
+  '.filter() creates a new array with all elements that satisfy a provided condition. ' +
+  'Here, only numbers greater than 10 are included in the new array.'
 }"><br>
 
 <input type=button value=".reduce()" onclick="{
   let myArray = [1, 2, 3, 4, 5]
   let sum = myArray.reduce((acc, val) => acc + val, 0)
   document.getElementById('mySpan01').innerHTML = sum
-  document.getElementById('explanation').innerHTML = '.reduce() executes a reducer function on each element, resulting in a single output value.'
+  document.getElementById('explanation').innerHTML = 
+  'Original Array: [1, 2, 3, 4, 5]<br>' +
+  'Reducer Function: (acc, val) => acc + val<br>' +
+  'Initial Value: 0<br>' +
+  'Calculation: (((((0+1)+2)+3)+4)+5) = 15<br><br>' +
+  'Explanation:<br>' +
+  '.reduce() applies a function against an accumulator and each element in the array to reduce it to a single value. ' +
+  'In this example, it sums all numbers together.'
 }"><br>
 
 <input type=button value=".find()" onclick="{
   let myArray = [10, 20, 30, 40]
   let found = myArray.find(x => x > 25)
   document.getElementById('mySpan01').innerHTML = found
-  document.getElementById('explanation').innerHTML = '.find() returns the first element in an array that meets a specified condition.'
+  document.getElementById('explanation').innerHTML = 
+  'Original Array: [10, 20, 30, 40]<br>' +
+  'Condition: x > 25<br>' +
+  'Result: 30<br><br>' +
+  'Explanation:<br>' +
+  '.find() returns the first element that satisfies a condition. ' +
+  'Here, it scans the array and returns 30, the first value greater than 25.'
 }"><br>
