@@ -138,3 +138,61 @@ String, Array, Object manipulation methods<br>
   '.find() returns the first element that satisfies a condition. ' +
   'Here, it scans the array and returns 30, the first value greater than 25.'
 }"><br>
+
+<h1>Interactive Array Manipulations</h1>
+
+Array (comma separated): <input id="arrayInput" type="text" value="10,20,30,40,50"><br>
+Condition / Function: <input id="conditionInput" type="text" value="x > 25"><br>
+<span id="mySpan01">...</span><br>
+<p id="explanation">Click a button to run a method using the array and condition above.</p><br>
+
+<input type=button value=".map()" onclick="{
+  let arr = document.getElementById('arrayInput').value.split(',').map(Number)
+  let funcBody = document.getElementById('conditionInput').value
+  try {
+    let mapped = arr.map(x => eval(funcBody))
+    document.getElementById('mySpan01').innerHTML = mapped.join(', ')
+    document.getElementById('explanation').innerHTML = 
+      'Original Array: [' + arr.join(', ') + ']<br>' +
+      'Mapping Function: ' + funcBody + '<br>' +
+      'Result: [' + mapped.join(', ') + ']<br><br>' +
+      'Explanation:<br>' +
+      '.map() applies the function you entered to every element in the array, returning a new array.'
+  } catch(e) {
+    document.getElementById('mySpan01').innerHTML = 'Error in expression.'
+  }
+}"><br>
+
+<input type=button value=".filter()" onclick="{
+  let arr = document.getElementById('arrayInput').value.split(',').map(Number)
+  let condition = document.getElementById('conditionInput').value
+  try {
+    let filtered = arr.filter(x => eval(condition))
+    document.getElementById('mySpan01').innerHTML = filtered.join(', ')
+    document.getElementById('explanation').innerHTML = 
+      'Original Array: [' + arr.join(', ') + ']<br>' +
+      'Filter Condition: ' + condition + '<br>' +
+      'Result: [' + filtered.join(', ') + ']<br><br>' +
+      'Explanation:<br>' +
+      '.filter() creates a new array including only the elements that satisfy the condition you typed.'
+  } catch(e) {
+    document.getElementById('mySpan01').innerHTML = 'Error in condition.'
+  }
+}"><br>
+
+<input type=button value=".find()" onclick="{
+  let arr = document.getElementById('arrayInput').value.split(',').map(Number)
+  let condition = document.getElementById('conditionInput').value
+  try {
+    let found = arr.find(x => eval(condition))
+    document.getElementById('mySpan01').innerHTML = found
+    document.getElementById('explanation').innerHTML = 
+      'Original Array: [' + arr.join(', ') + ']<br>' +
+      'Find Condition: ' + condition + '<br>' +
+      'Result: ' + found + '<br><br>' +
+      'Explanation:<br>' +
+      '.find() returns the first element that matches the condition you entered.'
+  } catch(e) {
+    document.getElementById('mySpan01').innerHTML = 'Error in condition.'
+  }
+}"><br>
