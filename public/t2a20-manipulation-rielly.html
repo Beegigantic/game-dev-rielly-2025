@@ -1,26 +1,69 @@
-<h1 align =center>t2a20 manipulation</h1>
-
+<h1 align=center>t2a20 manipulation</h1>
 String, Array, Object manipulation methods<br>
 
-<input id="myNum01" type=text value="This is a string" ><br>
+<input id="myNum01" type=text value="This is a string"><br>
 <span id="mySpan01">...</span><br>
 
 <input type=button value=".toUpperCase()" onclick="{
-    let myIn = document.getElementById('myNum01').value
-      document.getElementById('mySpan01').innerHTML = myIn.toUpperCase()
+  let myIn = document.getElementById('myNum01').value
+  document.getElementById('mySpan01').innerHTML = myIn.toUpperCase()
 }"><br>
 
-<input type=button value=".split() makes and array" onclick="{
-     let myIn = document.getElementById('myNum01').value
-       document.getElementById('mySpan01').innerHTML = myIn.split(' ')
-  }"><br>
+<input type=button value=".toLowerCase()" onclick="{
+  let myIn = document.getElementById('myNum01').value
+  document.getElementById('mySpan01').innerHTML = myIn.toLowerCase()
+}"><br>
 
-  <input type=button value="Object.keys() returns array" onclick="{
-      let myObject = {
-          first: 10,
-          second: 'Hello',
-          third: true
-      }
-    let keyArray = Object.keys(myObject)
-    document.getElementById('mySpan01').innerHTML = keyArray
-    }"><br>
+<input type=button value=".replace()" onclick="{
+  let myIn = document.getElementById('myNum01').value
+  document.getElementById('mySpan01').innerHTML = myIn.replace('string', 'sentence')
+}"><br>
+
+<input type=button value=".substring()" onclick="{
+  let myIn = document.getElementById('myNum01').value
+  document.getElementById('mySpan01').innerHTML = myIn.substring(0, 4)
+}"><br>
+
+<input type=button value=".split() makes an array" onclick="{
+  let myIn = document.getElementById('myNum01').value
+  document.getElementById('mySpan01').innerHTML = myIn.split(' ')
+}"><br>
+
+<input type=button value=".join()" onclick="{
+  let myArray = ['This','is','joined']
+  document.getElementById('mySpan01').innerHTML = myArray.join('-')
+}"><br>
+
+<input type=button value=".reverse()" onclick="{
+  let myArray = ['one','two','three']
+  document.getElementById('mySpan01').innerHTML = myArray.reverse()
+}"><br>
+
+<input type=button value=".sort()" onclick="{
+  let myArray = ['banana','apple','cherry']
+  document.getElementById('mySpan01').innerHTML = myArray.sort()
+}"><br>
+
+<input type=button value="Object.keys()" onclick="{
+  let myObject = { first: 10, second: 'Hello', third: true }
+  let keyArray = Object.keys(myObject)
+  document.getElementById('mySpan01').innerHTML = keyArray
+}"><br>
+
+<input type=button value="Object.values()" onclick="{
+  let myObject = { first: 10, second: 'Hello', third: true }
+  let valueArray = Object.values(myObject)
+  document.getElementById('mySpan01').innerHTML = valueArray
+}"><br>
+
+<input type=button value="Object.entries()" onclick="{
+  let myObject = { first: 10, second: 'Hello', third: true }
+  let entryArray = Object.entries(myObject)
+  document.getElementById('mySpan01').innerHTML = entryArray
+}"><br>
+
+<input type=button value="Add new property" onclick="{
+  let myObject = { first: 10, second: 'Hello', third: true }
+  myObject.fourth = 'New value'
+  document.getElementById('mySpan01').innerHTML = JSON.stringify(myObject)
+}"><br>
