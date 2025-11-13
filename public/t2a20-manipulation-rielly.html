@@ -3,92 +3,113 @@ String, Array, Object manipulation methods<br>
 
 <input id="myNum01" type=text value="This is a string"><br>
 <span id="mySpan01">...</span><br>
+<p id="explanation">Click any button to see an explanation.</p><br>
 
+<!-- STRING METHODS -->
 <input type=button value=".toUpperCase()" onclick="{
   let myIn = document.getElementById('myNum01').value
   document.getElementById('mySpan01').innerHTML = myIn.toUpperCase()
+  document.getElementById('explanation').innerHTML = '.toUpperCase() converts all letters in a string to uppercase.'
 }"><br>
 
 <input type=button value=".toLowerCase()" onclick="{
   let myIn = document.getElementById('myNum01').value
   document.getElementById('mySpan01').innerHTML = myIn.toLowerCase()
+  document.getElementById('explanation').innerHTML = '.toLowerCase() converts all letters in a string to lowercase.'
 }"><br>
 
 <input type=button value=".replace()" onclick="{
   let myIn = document.getElementById('myNum01').value
   document.getElementById('mySpan01').innerHTML = myIn.replace('string', 'sentence')
+  document.getElementById('explanation').innerHTML = '.replace() searches for a specified value and replaces it with another value.'
 }"><br>
 
 <input type=button value=".substring()" onclick="{
   let myIn = document.getElementById('myNum01').value
   document.getElementById('mySpan01').innerHTML = myIn.substring(0, 4)
+  document.getElementById('explanation').innerHTML = '.substring(start, end) extracts characters from a string between two indexes.'
 }"><br>
 
+<!-- ARRAY METHODS -->
 <input type=button value=".split() makes an array" onclick="{
   let myIn = document.getElementById('myNum01').value
   document.getElementById('mySpan01').innerHTML = myIn.split(' ')
+  document.getElementById('explanation').innerHTML = '.split() divides a string into an array of substrings based on a separator.'
 }"><br>
 
 <input type=button value=".join()" onclick="{
   let myArray = ['This','is','joined']
   document.getElementById('mySpan01').innerHTML = myArray.join('-')
+  document.getElementById('explanation').innerHTML = '.join() joins all elements of an array into a single string using a specified separator.'
 }"><br>
 
 <input type=button value=".reverse()" onclick="{
   let myArray = ['one','two','three']
-  document.getElementById('mySpan01').innerHTML = myArray.reverse()
+  document.getElementById('mySpan01').innerHTML = myArray.reverse().join(' ')
+  document.getElementById('explanation').innerHTML = '.reverse() reverses the order of elements in an array.'
 }"><br>
 
 <input type=button value=".sort()" onclick="{
   let myArray = ['banana','apple','cherry']
   document.getElementById('mySpan01').innerHTML = myArray.sort()
+  document.getElementById('explanation').innerHTML = '.sort() sorts the elements of an array alphabetically by default.'
 }"><br>
 
+<!-- OBJECT METHODS -->
 <input type=button value="Object.keys()" onclick="{
   let myObject = { first: 10, second: 'Hello', third: true }
   let keyArray = Object.keys(myObject)
   document.getElementById('mySpan01').innerHTML = keyArray
+  document.getElementById('explanation').innerHTML = 'Object.keys() returns an array of the property names of an object.'
 }"><br>
 
 <input type=button value="Object.values()" onclick="{
   let myObject = { first: 10, second: 'Hello', third: true }
   let valueArray = Object.values(myObject)
   document.getElementById('mySpan01').innerHTML = valueArray
+  document.getElementById('explanation').innerHTML = 'Object.values() returns an array of the property values of an object.'
 }"><br>
 
 <input type=button value="Object.entries()" onclick="{
   let myObject = { first: 10, second: 'Hello', third: true }
   let entryArray = Object.entries(myObject)
   document.getElementById('mySpan01').innerHTML = entryArray
+  document.getElementById('explanation').innerHTML = 'Object.entries() returns an array of [key, value] pairs for each property in an object.'
 }"><br>
 
 <input type=button value="Add new property" onclick="{
   let myObject = { first: 10, second: 'Hello', third: true }
   myObject.fourth = 'New value'
   document.getElementById('mySpan01').innerHTML = JSON.stringify(myObject)
+  document.getElementById('explanation').innerHTML = 'Adding a new property to an object allows dynamic expansion of its structure.'
 }"><br>
 
-<h1>Extremely powerful Array Manipulations</h1>
+<h1>Extremely Powerful Array Manipulations</h1>
+
 <input type=button value=".map()" onclick="{
   let myArray = [1, 2, 3, 4]
   let doubled = myArray.map(x => x * 2)
   document.getElementById('mySpan01').innerHTML = doubled.join(', ')
+  document.getElementById('explanation').innerHTML = '.map() creates a new array by applying a function to every element of the original array.'
 }"><br>
 
 <input type=button value=".filter()" onclick="{
   let myArray = [5, 10, 15, 20, 25]
   let filtered = myArray.filter(x => x > 10)
   document.getElementById('mySpan01').innerHTML = filtered.join(', ')
+  document.getElementById('explanation').innerHTML = '.filter() creates a new array containing only elements that satisfy a specified condition.'
 }"><br>
 
 <input type=button value=".reduce()" onclick="{
   let myArray = [1, 2, 3, 4, 5]
   let sum = myArray.reduce((acc, val) => acc + val, 0)
   document.getElementById('mySpan01').innerHTML = sum
+  document.getElementById('explanation').innerHTML = '.reduce() executes a reducer function on each element, resulting in a single output value.'
 }"><br>
 
 <input type=button value=".find()" onclick="{
   let myArray = [10, 20, 30, 40]
   let found = myArray.find(x => x > 25)
   document.getElementById('mySpan01').innerHTML = found
+  document.getElementById('explanation').innerHTML = '.find() returns the first element in an array that meets a specified condition.'
 }"><br>
