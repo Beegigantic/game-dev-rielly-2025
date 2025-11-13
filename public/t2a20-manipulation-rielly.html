@@ -67,3 +67,28 @@ String, Array, Object manipulation methods<br>
   myObject.fourth = 'New value'
   document.getElementById('mySpan01').innerHTML = JSON.stringify(myObject)
 }"><br>
+
+<h1>Extremely powerful Array Manipulations</h1>
+<input type=button value=".map()" onclick="{
+  let myArray = [1, 2, 3, 4]
+  let doubled = myArray.map(x => x * 2)
+  document.getElementById('mySpan01').innerHTML = doubled.join(', ')
+}"><br>
+
+<input type=button value=".filter()" onclick="{
+  let myArray = [5, 10, 15, 20, 25]
+  let filtered = myArray.filter(x => x > 10)
+  document.getElementById('mySpan01').innerHTML = filtered.join(', ')
+}"><br>
+
+<input type=button value=".reduce()" onclick="{
+  let myArray = [1, 2, 3, 4, 5]
+  let sum = myArray.reduce((acc, val) => acc + val, 0)
+  document.getElementById('mySpan01').innerHTML = sum
+}"><br>
+
+<input type=button value=".find()" onclick="{
+  let myArray = [10, 20, 30, 40]
+  let found = myArray.find(x => x > 25)
+  document.getElementById('mySpan01').innerHTML = found
+}"><br>
