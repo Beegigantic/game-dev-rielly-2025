@@ -1,0 +1,391 @@
+<html>
+<body>
+    <h1>Sorting Algorithm Visualization</h1>
+    <p id="statusMessage">Click "Randomize Array" or select a sort to begin visualization.</p>
+
+    <div>
+        <button id="randomizeButton" onclick="runRandomize(50)">
+            Randomize Array
+        </button>
+        <button id="bogoSortButton" onclick="runBogoSort()">
+            Run Bogo Sort (Visualized)
+        </button>
+        <button id="selectionSortButton" onclick="runSelectionSort()">
+            Run Selection Sort (Visualized)
+        </button>
+        <button id="radixSortButton" onclick="runRadixSort()">
+            Run Radix Sort (Visualized)
+        </button>
+        <button id="bubbleSortButton" onclick="runBubbleSort()">
+            Run Bubble Sort (Visualized)
+        </button>
+        <button id="insertionSortButton" onclick="runInsertionSort()">
+            Run Insertion Sort (Visualized)
+        </button>
+    </div>
+    <canvas id="sortCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('sortCanvas');
+        const ctx = canvas.getContext('2d');
+        const paddingX = 10;
+        const groundY = canvas.height - paddingX;
+
+        let currentArray = [];
+        const statusMessageEl = document.getElementById('statusMessage');
+        const ANIMATION_SPEED = 10;
+
+        // Tone.js Setup
+        let synth;
+        let scaleFactor;
+
+        function setupAudio(maxVal) {
+            if (!synth) {
+                synth = new Tone.Synth({
+                    oscillator: { type: "sine" },
+                    envelope: {
+                        attack: 0.001,
+                        decay: 0.05,
+                        sustain: 0.1,
+                        release: 0.05
+                    }
+                }).toDestination();
+            }
+            // Map the value (1 to maxVal) to a directly proportional pitch (MIDI note)
+            // Higher number = higher pitch
+            const minNote = 48; // C3
+            const maxNote = 81; // A5
+            scaleFactor = (maxNote - minNote) / maxVal;
+        }
+
+        function playNote(value) {
+            if (synth && Tone.context.state !== 'running') {
+                Tone.start();
+            }
+            if (synth) {
+                // Direct mapping: higher value means higher note (MIDI index)
+                const minNote = 48; 
+                const noteIndex = Math.round(minNote + (value * scaleFactor));
+                synth.triggerAttackRelease(Tone.Midi(noteIndex).toFrequency(), 0.01);
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function drawTowers(highlightA = -1, highlightB = -1) {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const currentSize = currentArray.length;
+            if (currentSize === 0) return;
+
+            const maxValue = currentSize;
+            const availableHeight = canvas.height - (2 * paddingX);
+            const heightScale = availableHeight / maxValue;
+            
+            const totalWidth = canvas.width - (2 * paddingX);
+            const barWidth = totalWidth / currentSize;
+            const isFullySorted = currentArray.every((num, index) => num === index + 1);
+
+            let currentX = paddingX;
+
+            currentArray.forEach((value, index) => {
+                const actualHeight = value * heightScale;
+                
+                if (index === highlightA || index === highlightB) {
+                    ctx.fillStyle = '#FF4136';
+                } else {
+                    ctx.fillStyle = isFullySorted ? '#34D399' : '#ffffff';
+                }
+
+                ctx.fillRect(currentX, groundY - actualHeight, barWidth, actualHeight);
+
+                currentX += barWidth;
+            });
+        }
+
+        function initializeArray(shuffle = false, size = 100) {
+            currentArray = Array.from({ length: size }, (_, i) => i + 1);
+
+            if (shuffle) {
+                for (let i = currentArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [currentArray[i], currentArray[j]] = [currentArray[j], currentArray[i]];
+                }
+                statusMessageEl.textContent = `Array of size ${size} randomized. Select a sort to run.`;
+            } else {
+                statusMessageEl.textContent = `Array of size ${size} initialized (currently sorted). Click "Randomize Array" to shuffle.`;
+            }
+
+            // Setup audio scaling based on the new array size
+            setupAudio(size);
+            drawTowers();
+        }
+
+        function disableButtons(state) {
+            document.getElementById('randomizeButton').disabled = state;
+            document.getElementById('bogoSortButton').disabled = state;
+            document.getElementById('selectionSortButton').disabled = state;
+            document.getElementById('radixSortButton').disabled = state;
+            document.getElementById('bubbleSortButton').disabled = state;
+            document.getElementById('insertionSortButton').disabled = state;
+        }
+
+        async function executeSortAndUpdate(sortFn, name, buttonId, newSize = currentArray.length) {
+            if (currentArray.length !== newSize) {
+                 initializeArray(true, newSize);
+            }
+            
+            disableButtons(true);
+            statusMessageEl.textContent = `Running ${name} Sort on ${currentArray.length} elements...`;
+            document.getElementById(buttonId).textContent = 'Sorting...';
+
+            const startTime = performance.now();
+            
+            await sortFn(currentArray); 
+            
+            const endTime = performance.now();
+            const time = (endTime - startTime).toFixed(3);
+
+            document.getElementById(buttonId).textContent = `Run ${name} (Visualized)`;
+            disableButtons(false);
+            statusMessageEl.textContent = `${name} Sort on ${currentArray.length} elements completed in ${time} ms.`;
+        }
+
+        function runRandomize(size) {
+            initializeArray(true, size);
+        }
+
+        function isSorted(arr) {
+            for (let i = 0; i < arr.length - 1; i++) {
+                if (arr[i] > arr[i + 1]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        async function bogoSort(arr) {
+            while (!isSorted(arr)) {
+                // Shuffle logic (Fisher-Yates)
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                    
+                    drawTowers(i, j);
+                    playNote(arr[i]);
+                    await sleep(150);
+                }
+            }
+            
+            statusMessageEl.textContent = `Bogo Sort: Performing final check...`;
+            for (let i = 0; i < arr.length; i++) {
+                drawTowers(i, i); 
+                playNote(arr[i]); 
+                await sleep(ANIMATION_SPEED * 5); 
+            }
+            drawTowers();
+            return arr;
+        }
+        
+        function runBogoSort() {
+            executeSortAndUpdate(bogoSort, 'Bogo Sort', 'bogoSortButton', 6);
+        }
+
+        async function selectionSort(arr) {
+            const n = arr.length;
+            for (let i = 0; i < n - 1; i++) {
+                let minIdx = i;
+                drawTowers(i, -1);
+                await sleep(ANIMATION_SPEED * 2);
+
+                for (let j = i + 1; j < n; j++) {
+                    drawTowers(j, minIdx);
+                    playNote(arr[j]);
+                    // Increased delay to ensure Tone.js can schedule the note
+                    await sleep(ANIMATION_SPEED * 3); 
+
+                    if (arr[j] < arr[minIdx]) {
+                        minIdx = j;
+                    }
+                }
+                
+                if (minIdx !== i) {
+                    [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+                    
+                    drawTowers(i, minIdx);
+                    playNote(arr[i]);
+                    await sleep(ANIMATION_SPEED * 5);
+                } else {
+                    await sleep(ANIMATION_SPEED * 5);
+                }
+            }
+
+            statusMessageEl.textContent = `Selection Sort: Performing final check...`;
+            for (let j = 0; j < n; j++) {
+                drawTowers(j, j);
+                playNote(arr[j]); 
+                await sleep(ANIMATION_SPEED * 2);
+            }
+            drawTowers();
+            return arr;
+        }
+
+        function runSelectionSort() {
+            executeSortAndUpdate(selectionSort, 'Selection Sort', 'selectionSortButton', 50);
+        }
+
+
+        async function bubbleSort(arr) {
+            const n = arr.length;
+            
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n - i - 1; j++) {
+                    
+                    drawTowers(j, j + 1);
+                    playNote(arr[j]);
+                    await sleep(ANIMATION_SPEED);
+
+                    if (arr[j] > arr[j + 1]) {
+                        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                        
+                        drawTowers(j, j + 1);
+                        playNote(arr[j]); 
+                        await sleep(ANIMATION_SPEED);
+                    }
+                }
+            }
+
+            statusMessageEl.textContent = `Bubble Sort: Performing final check...`;
+            for (let j = 0; j < n - 1; j++) {
+                drawTowers(j, j + 1);
+                playNote(arr[j]); 
+                await sleep(ANIMATION_SPEED * 2);
+            }
+            
+            drawTowers();
+            return arr;
+        }
+
+        function runBubbleSort() {
+            executeSortAndUpdate(bubbleSort, 'Bubble Sort', 'bubbleSortButton', 50);
+        }
+
+        async function insertionSort(arr) {
+            const n = arr.length;
+            
+            for (let i = 1; i < n; i++) {
+                let current = arr[i];
+                let j = i - 1;
+                
+                drawTowers(i, j);
+                playNote(current);
+                await sleep(ANIMATION_SPEED * 2);
+
+                while (j >= 0 && arr[j] > current) {
+                    drawTowers(j, j + 1);
+                    playNote(arr[j]); 
+                    await sleep(ANIMATION_SPEED);
+
+                    arr[j + 1] = arr[j];
+                    j = j - 1;
+                }
+                arr[j + 1] = current;
+                
+                drawTowers(j + 1, -1);
+                await sleep(ANIMATION_SPEED * 2);
+            }
+            
+            statusMessageEl.textContent = `Insertion Sort: Performing final check...`;
+            for (let i = 0; i < n; i++) {
+                drawTowers(i, i); 
+                playNote(arr[i]); 
+                await sleep(ANIMATION_SPEED); 
+            }
+            
+            drawTowers();
+            return arr;
+        }
+
+        function runInsertionSort() {
+            executeSortAndUpdate(insertionSort, 'Insertion Sort', 'insertionSortButton', 50);
+        }
+
+
+        async function radixSortLSD(arr) {
+            const a = arr; 
+            if (a.length <= 1) return a;
+
+            const maxDigitCount = mostDigits(a);
+            const passDelay = 700; 
+            const drawInterval = Math.ceil(a.length / 50); // Draw every 20 elements for 1000 bars
+            const drawSleep = 15; // Increased minimum sleep to prevent audio errors
+            const fastDrawSleep = 1; // Used for the final quick check
+
+            for (let k = 0; k < maxDigitCount; k++) {
+                let buckets = Array.from({ length: 10 }, () => []);
+
+                statusMessageEl.textContent = `Radix Sort: Checking digit place ${k + 1} of ${maxDigitCount}...`;
+                
+                for (let i = 0; i < a.length; i++) {
+                    let num = a[i];
+                    let digit = getDigit(num, k);
+                    
+                    if (i % drawInterval === 0 || i === a.length - 1) {
+                        drawTowers(i, -1);
+                        playNote(num);
+                        await sleep(drawSleep); 
+                    }
+
+                    buckets[digit].push(num);
+                }
+
+                let idx = 0;
+                for (let bucket of buckets) {
+                    for (let num of bucket) {
+                        a[idx++] = num;
+                    }
+                }
+                
+                drawTowers();
+                await sleep(passDelay); 
+            }
+            
+            statusMessageEl.textContent = `Radix Sort: Performing final check...`;
+            const step = Math.max(1, Math.floor(a.length / 100));
+            for (let i = 0; i < a.length; i += step) {
+                drawTowers(i, -1);
+                playNote(a[i]); 
+                await sleep(fastDrawSleep);
+            }
+            
+            drawTowers();
+            return a;
+        }
+
+        function runRadixSort() {
+            executeSortAndUpdate(radixSortLSD, 'Radix Sort', 'radixSortButton', 1000);
+        }
+        
+        function getDigit(num, place) {
+            return Math.floor(Math.abs(num) / Math.pow(10, place)) % 10;
+        }
+
+        function mostDigits(nums) {
+            if (nums.length === 6) return 1;
+            if (nums.length === 50) return 2;
+            if (nums.length === 1000) return 4;
+            
+            if (nums.length === 0) return 0;
+            const max = Math.max(...nums);
+            return Math.floor(Math.log10(max)) + 1;
+        }
+
+        window.onload = () => {
+            initializeArray(false, 50);
+        };
+    </script>
+
+</body>
+</html>
