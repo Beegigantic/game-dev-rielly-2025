@@ -1,5 +1,6 @@
 <html>
 <body>
+
     <h1>Sorting Algorithm Visualization</h1>
     <p id="statusMessage">Click "Randomize Array" or select a sort to begin visualization.</p>
 
@@ -23,7 +24,9 @@
             Run Insertion Sort (Visualized)
         </button>
     </div>
+
     <canvas id="sortCanvas" width="800" height="400"></canvas>
+
     <script>
         const canvas = document.getElementById('sortCanvas');
         const ctx = canvas.getContext('2d');
@@ -320,7 +323,8 @@
             const maxDigitCount = mostDigits(a);
             const passDelay = 700; 
             const drawInterval = Math.ceil(a.length / 50); // Draw every 20 elements for 1000 bars
-            const drawSleep = 15; // Increased minimum sleep to prevent audio errors
+            // Increased minimum sleep to 20ms to stabilize audio timing for 1000 elements
+            const drawSleep = 20; 
             const fastDrawSleep = 1; // Used for the final quick check
 
             for (let k = 0; k < maxDigitCount; k++) {
