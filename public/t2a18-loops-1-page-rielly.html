@@ -1,1 +1,191 @@
+<html>
+<body>
+  <h1>9 Loop Types (no CSS)</h1>
+  <p>Buttons run demos. Output shows each loop's behavior and result.</p>
 
+  <div>
+    <button id="runAll">Run All Demos</button>
+    <button data-demo="1">1: classic for</button>
+    <button data-demo="2">2: while</button>
+    <button data-demo="3">3: do...while</button>
+    <button data-demo="4">4: for...of</button>
+    <button data-demo="5">5: for...in</button>
+    <button data-demo="6">6: forEach</button>
+    <button data-demo="7">7: generator + for...of</button>
+    <button data-demo="8">8: async generator + for await...of</button>
+    <button data-demo="9">9: reduce</button>
+    <button id="clear">Clear</button>
+  </div>
+
+  <hr>
+
+  <pre id="out" aria-live="polite" style="white-space:pre-wrap;"></pre>
+
+<script>
+const out = document.getElementById('out');
+function log(...args){
+  out.textContent += args.map(String).join(' ') + '\n';
+}
+function show(title, fn){
+  log('--- ' + title + ' ---');
+  try {
+    const r = fn();
+    if (r instanceof Promise) {
+      r.then(res => { if (res !== undefined) log(res); })
+       .catch(e => log('ERROR:', e));
+    }
+  } catch(e){
+    log('ERROR:', e);
+  }
+}
+
+function demo1(){
+  show('1 classic for', () => {
+    const arr = ['a','b','c'];
+    for(let i=0;i<arr.length;i++){
+      log('i=' + i, 'value=' + arr[i]);
+    }
+  });
+}
+
+function demo2(){
+  show('2 while', () => {
+    let n = 1;
+    while(n <= 5){
+      log('n =', n);
+      n *= 2;
+    }
+    log('final n =', n);
+  });
+}
+
+function demo3(){
+  show('3 do...while', () => {
+    let tries = 0;
+    let token;
+    do {
+      tries++;
+      token = (tries === 1) ? null : 'ok';
+      log('attempt', tries, 'token', token);
+    } while(!token && tries < 5);
+    log('tries =', tries, 'token =', token);
+  });
+}
+
+function demo4(){
+  show('4 for...of', () => {
+    const s = new Set([10,20,30]);
+    for(const v of s){
+      log('value', v);
+    }
+    const m = new Map([['x',1],['y',2]]);
+    for(const [k,v] of m.entries()){
+      log('map entry', k, v);
+    }
+  });
+}
+
+function demo5(){
+  show('5 for...in', () => {
+    const obj = {name:'Ada', lang:'JS', year:1842};
+    for(const key in obj){
+      if(Object.prototype.hasOwnProperty.call(obj, key)){
+        log('key', key, 'value', obj[key]);
+      }
+    }
+  });
+}
+
+function demo6(){
+  show('6 forEach', () => {
+    const arr = [2,4,6];
+    arr.forEach((v,i,arrRef) => {
+      log('i=' + i, 'value=' + v, 'arr['+i+']=' + arrRef[i]);
+    });
+  });
+}
+
+function* range(start, end, step=1){
+  for(let i=start; i<=end; i+=step) yield i;
+}
+function demo7(){
+  show('7 generator + for...of', () => {
+    for(const n of range(1,5)){
+      log('from generator', n);
+    }
+    let count = 0;
+    for(const n of range(100, 110)){
+      if(++count > 3) { log('stopping after 3'); break; }
+      log('partial', n);
+    }
+  });
+}
+
+function sleep(ms){ return new Promise(res => setTimeout(res, ms)); }
+async function* asyncRange(start, end, msDelay=200){
+  for(let i=start;i<=end;i++){
+    await sleep(msDelay);
+    yield i;
+  }
+}
+async function demo8(){
+  show('8 async generator + for await...of', async () => {
+    const collected = [];
+    for await (const v of asyncRange(1,4,150)){
+      log('async value', v);
+      collected.push(v);
+    }
+    log('collected', collected.join(','));
+  });
+}
+
+function demo9(){
+  show('9 reduce', () => {
+    const nums = [1,2,3,4,5];
+    const sum = nums.reduce((acc, x) => acc + x, 0);
+    log('sum =', sum);
+    const grouped = nums.reduce((acc, x) => {
+      const k = (x % 2 === 0) ? 'even' : 'odd';
+      (acc[k] ||= []).push(x);
+      return acc;
+    }, {});
+    log('grouped =', JSON.stringify(grouped));
+  });
+}
+
+document.querySelectorAll('button[data-demo]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const n = Number(btn.getAttribute('data-demo'));
+    const fn = {
+      1: demo1,
+      2: demo2,
+      3: demo3,
+      4: demo4,
+      5: demo5,
+      6: demo6,
+      7: demo7,
+      8: demo8,
+      9: demo9
+    }[n];
+    if(fn) fn();
+  });
+});
+
+document.getElementById('runAll').addEventListener('click', async () => {
+  demo1();
+  demo2();
+  demo3();
+  demo4();
+  demo5();
+  demo6();
+  demo7();
+  await demo8();
+  demo9();
+});
+
+document.getElementById('clear').addEventListener('click', () => { out.textContent = ''; });
+
+log('Ready. Click a demo or "Run All".');
+</script>
+</body>
+</html>
