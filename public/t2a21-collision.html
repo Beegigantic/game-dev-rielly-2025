@@ -1,0 +1,125 @@
+<html>
+<body>
+<script>
+let dragInfo = null; // {id, offsetX, offsetY}
+
+function parsePx(value) {
+return parseInt(value || '0', 10) || 0;
+}
+
+function myHitOther(my1, my2) {
+let el1 = document.getElementById(my1);
+let el2 = document.getElementById(my2);
+let left1 = parsePx(el1.style.left);
+let right1 = left1 + parsePx(el1.style.width);
+let top1 = parsePx(el1.style.top);
+let bottom1 = top1 + parsePx(el1.style.height);
+let left2 = parsePx(el2.style.left);
+let right2 = left2 + parsePx(el2.style.width);
+let top2 = parsePx(el2.style.top);
+let bottom2 = top2 + parsePx(el2.style.height);
+
+if ((right1 >= left2) &&
+(bottom1 >= top2) &&
+(left1 <= right2) &&
+(top1 <= bottom2)) {
+return true;
+}
+return false;
+}
+
+function myCheckHit() {
+
+let player = 'myImg01';
+let obstacles = document.querySelectorAll('.obstacle');
+for (let ob of obstacles) {
+if (myHitOther(player, ob.id)) {
+alert('you lose');
+document.getElementById('myImg01').style.left = '20px';
+location = 'index.html';
+return;
+}
+}
+}
+
+
+function setToNaturalSize(id) {
+const el = document.getElementById(id);
+if (el.naturalWidth && el.naturalHeight) {
+el.style.width = el.naturalWidth + 'px';
+el.style.height = el.naturalHeight + 'px';
+}
+}
+
+window.addEventListener('keydown', function(e){
+const step = 10;
+const el = document.getElementById('myImg01');
+let x = parsePx(el.style.left);
+let y = parsePx(el.style.top);
+if (e.key === 'ArrowLeft') x -= step;
+else if (e.key === 'ArrowRight') x += step;
+else if (e.key === 'ArrowUp') y -= step;
+else if (e.key === 'ArrowDown') y += step;
+else return;
+el.style.left = x + 'px';
+el.style.top = y + 'px';
+myCheckHit();
+e.preventDefault();
+});
+
+document.addEventListener('pointerdown', function(e){
+const target = e.target.closest('img');
+if (!target) return;
+if (target.id !== 'myImg01') return;
+
+setToNaturalSize(target.id);
+
+dragInfo = {
+id: target.id,
+offsetX: e.clientX - parsePx(target.style.left),
+offsetY: e.clientY - parsePx(target.style.top)
+};
+target.setPointerCapture(e.pointerId);
+});
+
+document.addEventListener('pointermove', function(e){
+if (!dragInfo) return;
+const el = document.getElementById(dragInfo.id);
+el.style.left = (e.clientX - dragInfo.offsetX) + 'px';
+el.style.top = (e.clientY - dragInfo.offsetY) + 'px';
+myCheckHit();
+});
+
+document.addEventListener('pointerup', function(e){
+if (!dragInfo) return;
+try { document.getElementById(dragInfo.id).releasePointerCapture(e.pointerId); } catch(err){}
+dragInfo = null;
+});
+</script>
+
+<br><br><h2 align=center>t2a21-collision-fred.html</h2>
+<!-- CHANGE PLAYER IMAGE HERE -->
+$1
+
+<img id="myImg02" class="obstacle" src="myImage02.jpg" alt="ob1" style="position:absolute; left:200px; top:30px; width:120px; height:80px;">
+<img id="myImg03" class="obstacle" src="myImage03.jpg" alt="ob2" style="position:absolute; left:100px; top:150px; width:60px; height:60px;">
+
+
+<br>
+
+<input type=button value="Move" onclick="(function(){
+const el = document.getElementById('myImg01');
+el.style.left = (parseInt(el.style.left || '0') + 10) + 'px';
+myCheckHit();
+})()"><br>
+
+<input type=button value="Reset" onclick="(function(){
+const el = document.getElementById('myImg01');
+el.style.left='0px'; el.style.top='0px'; el.style.width='50px'; el.style.height='30px';
+})()"><br>
+
+<p>Drag the first image (or use arrow keys / Move button). It will resize to its natural image size when you drag it. Collisions with obstacles trigger the same action as original code.</p>
+
+
+</body>
+</html>
