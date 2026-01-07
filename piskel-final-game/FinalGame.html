@@ -64,7 +64,7 @@
         left: 0;
         width: 100%;
         height: 64px; /* one tile high */
-        background-image: url("floor.gif");
+        background-image: url("/floor.gif");
         background-repeat: repeat-x;
         background-size: auto 64px;
     }
@@ -77,7 +77,7 @@
     /* small floating platform pieces used per level (for gaps, teaching jumps) */
     .platform-piece {
         position: absolute;
-        background-image: url("floor.gif");
+        background-image: url("/floor.gif");
         background-repeat: repeat-x;
         background-size: auto 40px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.4);
@@ -89,7 +89,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url("dirt.gif");
+    background-image: url("/dirt.gif");
     background-repeat: repeat;
     background-size: 64px 64px;
     background-position: center top;
@@ -97,7 +97,7 @@
     .platform-piece .top-face { position:absolute; left:0; right:0; top:0; height:40px; overflow:visible; }
     .platform-piece .top-inner {
         position:absolute; inset:0;
-        background-image: url("floor.gif");
+        background-image: url("/floor.gif");
         background-repeat: repeat;
         background-size: 64px 40px;
         transform-origin: center;
@@ -125,7 +125,7 @@
     .wall .face .face-inner {
         position: absolute;
         inset: 0;
-        background-image: url("dirt.gif");
+        background-image: url("/dirt.gif");
         /* simple repeat tiling using the original tile size */
         background-repeat: repeat-y;
         background-size: 64px 64px;
@@ -145,7 +145,7 @@
         left: 64px;
         right: 64px;
         bottom: 0;
-        background-image: url("dirt.gif");
+        background-image: url("/dirt.gif");
         background-repeat: repeat-y;
         background-size: 64px auto;
         background-position: center top;
@@ -1238,3 +1238,4 @@ if (collidedDuringDash) {
 
 </body>
 </html>
+
