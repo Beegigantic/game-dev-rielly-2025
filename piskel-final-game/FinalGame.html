@@ -38,23 +38,117 @@
         transform-origin: center;
     }
 
+      #trigger {
+        position: absolute;
+        width: 256px;
+        height: 256px;
+        background-image: url("flag.gif");
+        pointer-events: none;
+  }
+
     #platform {
         position: absolute;
-        bottom: 100px;
+        /* platform removed visually */
+        display: none;
+        bottom: 0;
         left: 0;
         width: 100%;
-        height: 40px;
-        background: #555;
+        height: 64px;
+        overflow: visible;
     }
+
+    /* floor is composed of a top decorative tile (floor.gif) and the main dirt body (dirt.gif) */
+    #platform .floor-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 64px; /* one tile high */
+        background-image: url("floor.gif");
+        background-repeat: repeat-x;
+        background-size: auto 64px;
+    }
+    #platform .floor-main {
+        position: absolute;
+        /* remove the deep dirt body — keep only the top decorative strip */
+        display: none;
+    }
+
+    /* small floating platform pieces used per level (for gaps, teaching jumps) */
+    .platform-piece {
+        position: absolute;
+        background-image: url("floor.gif");
+        background-repeat: repeat-x;
+        background-size: auto 40px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        
+    }
+    .platform-piece .body {
+    position: absolute;
+    top: 40px;              /* starts below the top strip */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("dirt.gif");
+    background-repeat: repeat;
+    background-size: 64px 64px;
+    background-position: center top;
+}
+    .platform-piece .top-face { position:absolute; left:0; right:0; top:0; height:40px; overflow:visible; }
+    .platform-piece .top-inner {
+        position:absolute; inset:0;
+        background-image: url("floor.gif");
+        background-repeat: repeat;
+        background-size: 64px 40px;
+        transform-origin: center;
+        transform: rotate(180deg); /* default: face down when covered */
+    }
+    .platform-piece.exposed .top-inner { transform: rotate(0deg); }
 
     /* simple wall block the player can stick to when holding Z */
     .wall {
         position: absolute;
-        width: 64px;
+        width: 128px; /* doubled width */
         height: 480px;
-        background: #774;
-        bottom: 80px; /* sits slightly above the ground */
+        bottom: 256px; /* aligned with platform top strip */
         left: 800px;
+        pointer-events: auto;
+    }
+    /* left/right faces use the floor tile repeated vertically; left face is flipped so the top faces outward */
+    .wall .face {
+        position: absolute;
+        top: 0;
+        width: 64px;
+        height: 100%;
+        overflow: visible;
+    }
+    .wall .face .face-inner {
+        position: absolute;
+        inset: 0;
+        background-image: url("dirt.gif");
+        /* simple repeat tiling using the original tile size */
+        background-repeat: repeat-y;
+        background-size: 64px 64px;
+        background-position: center top;
+        transform: none;
+        transform-origin: center;
+    }
+    .wall .face.left { left: 0; }
+    .wall .face.right { right: 0; }
+    /* ensure no rotations are applied to face-inner so the tile displays normally */
+    .wall .face.left .face-inner,
+    .wall .face.right .face-inner { transform: none; }
+    /* middle section uses dirt so the top of the wall visually matches the floor-top without producing a roof tile */
+    .wall .mid {
+        position: absolute;
+        top: 0;
+        left: 64px;
+        right: 64px;
+        bottom: 0;
+        background-image: url("dirt.gif");
+        background-repeat: repeat-y;
+        background-size: 64px auto;
+        background-position: center top;
     }
 
     .particle {
@@ -65,6 +159,15 @@
         background-size: cover;
         pointer-events: none;
         opacity: 1;
+    }
+
+    /* blinking red tint when holding to a wall too long */
+    @keyframes blinkRed {
+        0%,100% { filter: none; }
+        50% { filter: hue-rotate(-30deg) saturate(2) brightness(0.85); }
+    }
+    .blink-red {
+        animation: blinkRed 0.6s steps(2) infinite;
     }
 
     /* menu / title styles */
@@ -92,9 +195,41 @@
     .title { font-size: 48px; letter-spacing: 2px; margin-bottom: 8px; }
     .subtitle { font-size: 14px; color: #bbb; margin-bottom: 18px; }
     .level-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 12px; }
-    .menu-button { background:#2b6; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:700; }
+    .menu-button { background:rgb(81, 209, 226); border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:700; }
     .menu-button.alt { background:#58a; }
-    .menu-note { margin-top:8px; color:#ccc; font-size:12px }
+    .menu-note { margin-top:8px; color:#f7f7f7; font-size:18px }
+    /* on-screen hint box that fades in/out */
+    #hint {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 18px;
+        background: rgba(0,0,0,0.72);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-family: system-ui, Arial, sans-serif;
+        font-size: 14px;
+        opacity: 0;
+        transition: opacity 360ms ease-in-out;
+        pointer-events: none;
+        z-index: 1000;
+    }
+    .world-hint {
+        position: absolute;
+        background: rgba(0,0,0,0.72);
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-family: system-ui, Arial, sans-serif;
+        font-size: 13px;
+        opacity: 0;
+        transition: opacity 360ms ease-in-out;
+        pointer-events: none;
+        z-index: 800;
+        transform: translateX(-50%);
+        white-space: nowrap;
+    }
 </style>
 </head>
 <body>
@@ -102,25 +237,32 @@
 <div id="game">
     <div id="world">
         <div id="player"></div>
-        <div id="platform"></div>
-        <div class="wall" id="wall1"></div>
+        <div id="platform">
+            <div class="floor-top"></div>
+            <div class="floor-main"></div>
+        </div>
+        <div class="wall" id="wall1">
+                <div class="face left"><div class="face-inner"></div></div>
+                <div class="mid"></div>
+                <div class="face right"><div class="face-inner"></div></div>
+        </div>
         <!-- add more walls as needed by duplicating the .wall element and changing left/top -->
     </div>
+
+        <div id="hint"></div>
 </div>
 
 <!-- Title / Level select menu -->
 <div id="menu">
     <div class="menu-card">
         <div class="title">EVEREST</div>
-        <div class="subtitle">Choose a level</div>
         <div class="level-row">
-            <button class="menu-button" onclick="startLevel(1)">Level 1</button>
-            <button class="menu-button" onclick="startLevel(2)">Level 2</button>
-            <button class="menu-button" onclick="startLevel(3)">Level 3</button>
+            <button class="menu-button" onclick="startLevel(1)">Play Game</button>
         </div>
-        <div class="menu-note">Each level has a taller wall — climb carefully.</div>
+        <div class="menu-note">Adventurer reach your way to the top!</div>
     </div>
 </div>
+
 
 <script>
 const game = document.getElementById("game");
@@ -129,9 +271,15 @@ const player = document.getElementById("player");
 const platform = document.getElementById("platform");
 const walls = Array.from(document.querySelectorAll('.wall'));
 
+
 // world dimensions must match the CSS above
 const worldWidth = 4000;
 const worldHeight = 1000;
+
+// global tile/shift settings
+const TILE = 64;
+const SHIFT_TILES = 5; // move everything right by this many tiles
+const GLOBAL_SHIFT = TILE * SHIFT_TILES;
 
 // Sprite filenames (easy to change in one place)
 const SPRITES = {
@@ -144,7 +292,7 @@ const SPRITES = {
     dash: 'dash.gif'       // dash image (pointed to the right); will flip when dashing left
 };
 
-let x = 100; // player position in world coordinates
+let x = 100 + GLOBAL_SHIFT; // player position in world coordinates
 let y = 0;
 let prevX = x;
 let prevY = y;
@@ -154,6 +302,11 @@ let facing = 1;
 let wasMoving = false;
 let wasJumpPressed = false;
 let wasStanding = false;
+
+
+const CAMERA_RIGHT_LOCK_X = 2100;
+
+
 
 // dash/wall states
 let isWallSticking = false;
@@ -173,6 +326,54 @@ let canDash = true;
 // prevent immediate re-stick after wall-jump so player is pushed away naturally
 const STICK_COOLDOWN_FRAMES = 18;
 let stickCooldown = 0;
+
+// wall hold and auto-slide when held too long
+let wallHoldFrames = 0;
+const WALL_HOLD_TO_SLIDE = 90; // frames to hold before auto-slide starts (~1.5s at 60fps)
+const WALL_AUTO_SLIDE_SPEED = 1.2; // downward speed when auto-sliding from hold
+let isAutoSlideFromHold = false;
+// when true, player cannot re-stick until they touch ground (like dash consumption)
+let wallOverheated = false;
+// after certain wall-jumps we ignore input toward the wall until jump peak
+let ignoreTowardsWallInput = false;
+let jumpIgnoreWallSide = null; // 'left' or 'right'
+// death state when falling off-screen
+let isDead = false;
+
+// Hint system: triggers and display
+const hintBox = document.getElementById('hint');
+let hintTimeout = null;
+const HINT_DURATION = 4200;
+const hintTriggers = {
+    jump: { x: null, shown: false },
+    wall: { x: null, shown: false },
+    dash: { x: null, shown: false }
+};
+
+function showHint(msg, duration = HINT_DURATION) {
+    // prefer a world-anchored hint if available
+    const worldHint = document.getElementById('world-hint');
+    if (worldHint && typeof showHint.worldX === 'number' && typeof showHint.worldY === 'number') {
+        worldHint.textContent = msg;
+        worldHint.style.left = showHint.worldX + 'px';
+        worldHint.style.top = showHint.worldY + 'px';
+        worldHint.style.opacity = '1';
+        if (hintTimeout) clearTimeout(hintTimeout);
+        hintTimeout = setTimeout(() => { worldHint.style.opacity = '0'; hintTimeout = null; }, duration);
+        return;
+    }
+    if (!hintBox) return;
+    hintBox.textContent = msg;
+    hintBox.style.opacity = '1';
+    if (hintTimeout) clearTimeout(hintTimeout);
+    hintTimeout = setTimeout(() => { hintBox.style.opacity = '0'; hintTimeout = null; }, duration);
+}
+
+// create a world-anchored hint element so text appears at world coordinates
+const worldHint = document.createElement('div');
+worldHint.id = 'world-hint';
+worldHint.className = 'world-hint';
+world.appendChild(worldHint);
 
 const gravity = 0.6;
 const speed = 5;
@@ -227,7 +428,6 @@ function spawnParticles() {
         animate();
     }
 }
-
 function spawnDashTrail() {
     // spawn a small burst of particles behind the player in the opposite direction of dash
     const count = 3;
@@ -258,10 +458,47 @@ function spawnDashTrail() {
     }
 }
 
-// Start a selected level: configure wall height and start the game loop
+
+    // Start a selected level: configure wall height and start the game loop
 let selectedLevel = 1;
 // guard so we only start the game loop once (prevents multiple concurrent loops)
 let gameStarted = false;
+    // helper to manage dynamic level pieces
+    function clearLevelPieces() {
+        const pieces = Array.from(document.querySelectorAll('.platform-piece'));
+        for (const p of pieces) p.remove();
+    }
+function createPlatformPiece(left, width, height) {
+    const p = document.createElement('div');
+    p.className = 'platform-piece';
+    p.style.left = left + 'px';
+    p.style.width = width + 'px';
+
+    const platTop = getPlatformTop();
+    p.style.top = (platTop - height) + 'px';
+    p.style.height = '1000px';   // must be tall to allow vertical texture
+
+    const topFace = document.createElement('div');
+    topFace.className = 'top-face';
+    const topInner = document.createElement('div');
+    topInner.className = 'top-inner';
+    topFace.appendChild(topInner);
+    p.appendChild(topFace);
+
+    const body = document.createElement('div');   // ← THIS IS THE FIX
+    body.className = 'body';
+    p.appendChild(body);
+
+    world.appendChild(p);
+    return p;
+}
+    function getPlatformTop() {
+        // If the platform element is visible, use its offsetTop; otherwise use world bottom minus 64
+        try {
+            if (platform && window.getComputedStyle(platform).display !== 'none') return platform.offsetTop;
+        } catch (e) {}
+        return worldHeight - 64; // default platform top when floor removed
+    }
 function startLevel(level) {
     selectedLevel = level;
     const wall = document.getElementById('wall1');
@@ -270,22 +507,179 @@ function startLevel(level) {
     const h = heights[level] || 240;
     wall.style.height = h + 'px';
     // place wall somewhere in the world (keep left at 800)
-    wall.style.left = (800 + (level-1)*160) + 'px';
+    wall.style.left = (800 + GLOBAL_SHIFT + (level-1)*160) + 'px';
 
     // reset player and state for a fresh start
-    x = 100 + (level-1)*40;
+    x = 100 + GLOBAL_SHIFT + (level-1)*40;
     y = 0;
     velocityY = 0;
     isDashing = false; dashFramesLeft = 0; dashVelX = 0; dashVelY = 0;
     wallJumpVelX = 0; wallJumpFramesLeft = 0;
     stickCooldown = 0;
+    wallHoldFrames = 0;
+    isAutoSlideFromHold = false;
+    player.classList.remove('blink-red');
+    wallOverheated = false;
     canDash = true;
 
     // hide menu and start game loop
     document.getElementById('menu').style.display = 'none';
+    // configure level-specific pieces
+    clearLevelPieces();
+    const platTop = getPlatformTop();
+    if (level === 1) {
+        // easy tutorial: start platform, gap, wall to climb, then ground walk
+        const leftPlat = createPlatformPiece(80 + GLOBAL_SHIFT, 220, 40);
+        const rightPlat = createPlatformPiece(460 + GLOBAL_SHIFT, 180, 40);
+        // place wall flush to the right platform's right edge and align its top to platform top
+        const wallLeft = rightPlat.offsetLeft + rightPlat.offsetWidth;
+        wall.style.left = wallLeft + 'px';
+        wall.style.top = (platTop - wall.offsetHeight) + 'px';
+        // place player on the left platform
+        x = leftPlat.offsetLeft + 20;
+        y = leftPlat.offsetTop - 128;
+        // add a walkway with a dash-only gap at the far end
+        (function createDashGapWalkway(){
+            const WALK_H = 40;
+            const LEFT_LEN = 520; // length of the walkable top connected to the wall
+            const GAP_W = 384;    // gap width that requires a dash to cross (increased by one tile = 64px)
+            const RIGHT_LEN = 160; // small landing platform after the gap
+            const baseLeft = wall.offsetLeft;
+            const wallTop = wall.offsetTop;
+
+            // left walkway (attached to wall)
+            const leftWalk = document.createElement('div');
+            leftWalk.className = 'platform-piece';
+            leftWalk.style.left = baseLeft + 'px';
+            leftWalk.style.width = LEFT_LEN + 'px';
+            leftWalk.style.top = (wallTop - WALK_H) + 'px';
+            leftWalk.style.height ='1000px';
+            const lfTop = document.createElement('div'); lfTop.className = 'top-face';
+            lfTop.appendChild(Object.assign(document.createElement('div'), { className: 'top-inner' }));
+            leftWalk.appendChild(lfTop);
+            const leftBody = document.createElement('div');
+            leftBody.className = 'body';
+            leftWalk.appendChild(leftBody);
+            world.appendChild(leftWalk);
+            // right landing platform after the gap (must dash to reach)
+            const rightLeft = baseLeft + LEFT_LEN + GAP_W;
+            const rightPlat = document.createElement('div');
+            rightPlat.className = 'platform-piece';
+            rightPlat.style.left = rightLeft + 'px';
+            rightPlat.style.width = RIGHT_LEN + '0px';
+            rightPlat.style.top = (wallTop - WALK_H) + 'px';
+            rightPlat.style.height = '1000px';
+            const rpTop = document.createElement('div'); rpTop.className = 'top-face';
+            rpTop.appendChild(Object.assign(document.createElement('div'), { className: 'top-inner' }));
+            rightPlat.appendChild(rpTop);
+            const rightBody = document.createElement('div');
+            rightBody.className = 'body';
+            rightPlat.appendChild(rightBody);
+            world.appendChild(rightPlat);
+            // set hint trigger positions for Level 1 (world coordinates)
+            // jump: just before the initial gap between leftPlat and rightPlat
+            hintTriggers.jump.x = leftPlat.offsetLeft + leftPlat.offsetWidth - 280;
+            hintTriggers.jump.y = leftPlat.offsetTop - 80;
+            // wall: near the wall face
+            hintTriggers.wall.x = wall.offsetLeft - 100;
+            hintTriggers.wall.y = wall.offsetTop + 200;
+            // dash: at the edge of the top walkway before the big gap
+            hintTriggers.dash.x = baseLeft + LEFT_LEN - 100;
+            hintTriggers.dash.y = wall.offsetTop - 80;
+            hintTriggers.jump.shown = hintTriggers.wall.shown = hintTriggers.dash.shown = false;
+            if (hintBox) { hintBox.style.opacity = '0'; if (hintTimeout) { clearTimeout(hintTimeout); hintTimeout = null; } }
+        })();
+        // create an ascending walkway (steps) leading up to the left platform
+        (function createAscendingWalk(){
+            const steps = 9; // make it longer
+            const stepW = 140;
+            const rise = 28; // pixels up per step
+            const platTopNow = getPlatformTop();
+            // start a bit left of the leftPlat
+            const startX = leftPlat.offsetLeft - steps * stepW;
+            for (let i = 0; i < steps; i++) {
+                const s = document.createElement('div');
+                s.className = 'platform-piece';
+                s.style.left = (startX + i * stepW) + 'px';
+                s.style.width = stepW + 'px';
+                s.style.height = '1000px';
+                s.style.top = (platTopNow - 40 - (steps - i) * rise) + 'px';
+                const tf = document.createElement('div'); tf.className = 'top-face';
+                tf.appendChild(Object.assign(document.createElement('div'), { className: 'top-inner' }));
+                s.appendChild(tf);
+
+                const body = document.createElement('div');   // REQUIRED
+                body.className = 'body';
+                s.appendChild(body);
+
+                world.appendChild(s);
+            }
+            // spawn player at the topmost step
+            const spawnX = startX + (steps - 1) * stepW + 20;
+            const spawnY = platTopNow - 40 - 1 * rise - 128;
+            x = spawnX;
+            y = spawnY;
+        })();
+    } else if (level === 2) {
+        // Level 2: add a small starting platform where the player spawns
+        // create a short platform near the default spawn X and place the player on it
+        const spawnLeft = 100 + GLOBAL_SHIFT + (level-1) * 40;
+        const startPlat = createPlatformPiece(spawnLeft - 40, 220, 40);
+        // place the platform a bit above the bottom so it's visible as a staging area
+        startPlat.style.top = (worldHeight - 260) + 'px';
+        // place the player on top of this platform
+        x = startPlat.offsetLeft + 20;
+        y = startPlat.offsetTop - 128;
+        // place wall further right of the starting platform and align its top
+        const wallLeft = startPlat.offsetLeft + startPlat.offsetWidth + 200;
+        wall.style.left = wallLeft + 'px';
+        wall.style.top = (startPlat.offsetTop - wall.offsetHeight) + 'px';
+        // reset hint triggers for level 2
+        hintTriggers.jump.x = startPlat.offsetLeft + startPlat.offsetWidth - 40;
+        hintTriggers.jump.y = startPlat.offsetTop - 80;
+        hintTriggers.wall.x = wall.offsetLeft - 40;
+        hintTriggers.wall.y = wall.offsetTop - 100;
+        hintTriggers.jump.shown = hintTriggers.wall.shown = hintTriggers.dash.shown = false;
+    } else if (level === 3) {
+        // default: single big floor and wall as before; place wall with top alignment
+        wall.style.left = (800 + GLOBAL_SHIFT + (level-1)*160) + 'px';
+        wall.style.top = (platTop - wall.offsetHeight) + 'px';
+    }
+
     // start the loop only once — subsequent level selects should not spawn extra loops
     if (!gameStarted) { gameStarted = true; update(); }
 }
+
+
+const flag = document.getElementById('flag');
+
+function isColliding(a, b) {
+  const rectA = a.getBoundingClientRect();
+  const rectB = b.getBoundingClientRect();
+  return !(
+    rectA.top + rectA.height < rectB.top ||
+    rectA.top > rectB.top + rectB.height ||
+    rectA.left + rectA.width < rectB.left ||
+    rectA.left > rectB.left + rectB.width
+  );
+}
+
+function nextLevel() {
+
+    if(isColliding(player, flag)) {
+    selectedLevel++;       // increment the level
+    startLevel(selectedLevel); // start the next level
+}
+
+}
+
+
+
+
+
+
+
+
 
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
@@ -328,27 +722,61 @@ function update() {
         canDash = false;
     }
 
-    // Movement only applies when not dashing and not wall-sticking
-    if (!isDashing && !isWallSticking) {
-        if (!crouching) {
-            if (keys["ArrowLeft"]) {
-                if (!wasMoving && onGround) spawnParticles();
-                x -= speed;
-                moving = true;
-                facing = -1;
+    // Movement handling: dashing, normal movement, and auto-slide when holding to wall too long
+    if (!isDashing) {
+        if (isWallSticking) {
+            // while sticking, increment hold counter and either hold or begin auto-slide
+            if (wallHoldFrames > WALL_HOLD_TO_SLIDE) {
+                // auto-slide active: allow downward movement while still attached
+                isAutoSlideFromHold = true;
+                velocityY = WALL_AUTO_SLIDE_SPEED;
+                y += velocityY;
+                // occasional slide particles while auto-sliding
+                slideParticleTimer++;
+                if (slideParticleTimer >= SLIDE_PARTICLE_INTERVAL) {
+                    slideParticleTimer = 0;
+                    const p = document.createElement('div');
+                    p.className = 'particle';
+                    p.style.left = (x + 52) + 'px';
+                    p.style.top = (y + 120) + 'px';
+                    world.appendChild(p);
+                    let life = 20; let vy = 1.2; let vx = (Math.random() - 0.5) * 1.2;
+                    function anim() { life--; p.style.top = (p.offsetTop + vy) + 'px'; p.style.left = (p.offsetLeft + vx) + 'px'; p.style.opacity = life/20; if (life>0) requestAnimationFrame(anim); else p.remove(); }
+                    anim();
+                }
+            } else {
+                // hold to wall: cancel vertical velocity
+                isAutoSlideFromHold = false;
+                velocityY = 0;
             }
-            if (keys["ArrowRight"]) {
-                if (!wasMoving && onGround) spawnParticles();
-                x += speed;
-                moving = true;
-                facing = 1;
+        } else {
+            // normal horizontal movement when not wall-sticking
+            if (!crouching) {
+                if (keys["ArrowLeft"]) {
+                    // ignore left input if we're temporarily blocking input toward a right-side wall
+                    if (!(ignoreTowardsWallInput && jumpIgnoreWallSide === 'right')) {
+                        if (!wasMoving && onGround) spawnParticles();
+                        x -= speed;
+                        moving = true;
+                        facing = -1;
+                    }
+                }
+                if (keys["ArrowRight"]) {
+                    // ignore right input if we're temporarily blocking input toward a left-side wall
+                    if (!(ignoreTowardsWallInput && jumpIgnoreWallSide === 'left')) {
+                        if (!wasMoving && onGround) spawnParticles();
+                        x += speed;
+                        moving = true;
+                        facing = 1;
+                    }
+                }
             }
+
+            // Note: normal ground jump handled after wall checks so wall-jump can also trigger
+
+            velocityY += gravity;
+            y += velocityY;
         }
-
-        // Note: normal ground jump handled after wall checks so wall-jump can also trigger
-
-        velocityY += gravity;
-        y += velocityY;
     } else if (isDashing && dashFramesLeft > 0) {
         // perform dash movement (frames-based) with ease-out so it slows toward the end
         // multiplier ranges from ~1 down to small >0; square it for stronger easing
@@ -366,63 +794,166 @@ function update() {
         }
     }
 
-    // platform collision (same as before)
-    const platformTop = platform.offsetTop;
-    if (y + 128 >= platformTop) {
-        y = platformTop - 128;
+    // platform collision: prefer dynamic platform pieces when present (enables gaps).
+    // If no piece overlaps the player horizontally, there's no ground and the player falls through.
+    for (const p of document.querySelectorAll('.platform-piece')) {
+    const wl = p.offsetLeft;
+    const wt = p.offsetTop;
+    const ww = p.offsetWidth;
+    const wh = p.offsetHeight;
+
+    if (!rectsOverlap(x, y, 128, 128, wl, wt, ww, wh)) continue;
+
+    const prevRight = prevX + 128;
+    const prevLeft = prevX;
+    const prevBottom = prevY + 128;
+    const prevTop = prevY;
+
+    const wlRight = wl + ww;
+    const wtBottom = wt + wh;
+
+    const overlapX = Math.min(x + 128, wlRight) - Math.max(x, wl);
+    const overlapY = Math.min(y + 128, wtBottom) - Math.max(y, wt);
+
+    // falling onto top → allow landing
+    if (prevBottom <= wt && velocityY >= 0) {
+        y = wt - 128;
         velocityY = 0;
         onGround = true;
-    } else {
-        onGround = false;
+        continue;
     }
+
+    // otherwise resolve like a wall
+    if (overlapX < overlapY) {
+        if (x < wl) x -= overlapX;
+        else x += overlapX;
+        velocityX = 0;
+    } else {
+        if (y < wt) y -= overlapY;
+        else y += overlapY;
+        velocityY = 0;
+    }
+}
+
 
     if (!wasOnGround && onGround) {
         spawnParticles();
         // reset dash availability when touching the ground
         canDash = true;
+        // clear wall-overheat state so the player can stick again after landing
+        wallOverheated = false;
+        wallHoldFrames = 0;
+        isAutoSlideFromHold = false;
+        player.classList.remove('blink-red');
+        // also clear any input-ignore set by wall-jumps
+        ignoreTowardsWallInput = false;
+        jumpIgnoreWallSide = null;
     }
 
-    // Resolve wall collisions (make walls solid) and compute side-touching for wall-stick
-    let collidedDuringDash = false;
-    const pw = 128, ph = 128;
-    for (const w of walls) {
-        const wl = w.offsetLeft, wt = w.offsetTop, ww = w.offsetWidth, wh = w.offsetHeight;
-        if (rectsOverlap(x, y, pw, ph, wl, wt, ww, wh)) {
-            // compute overlap amounts
-            const overlapX = Math.min(x + pw, wl + ww) - Math.max(x, wl);
-            const overlapY = Math.min(y + ph, wt + wh) - Math.max(y, wt);
-            if (overlapX < overlapY) {
-                // resolve horizontally
-                if (x + pw / 2 < wl + ww / 2) {
-                    // player is on the left side -> push left
-                    x -= overlapX;
-                } else {
-                    // player on the right side -> push right
-                    x += overlapX;
-                }
-            } else {
-                // resolve vertically
-                if (y + ph / 2 < wt + wh / 2) {
-                    // player above the wall -> push up
-                    y -= overlapY;
-                    velocityY = 0;
-                    onGround = true; // treat the top of a wall as ground for now
-                } else {
-                    // player below the wall -> push down
-                    y += overlapY;
-                    velocityY = 0;
-                }
+    // death when falling off the bottom of the world
+    if (!isDead && y > worldHeight + 200) {
+        isDead = true;
+        // stronger explosion of particles upward
+        const cx = x + 64, cy = y + 64;
+        const COUNT = 96;
+        for (let i = 0; i < COUNT; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            // random spread around center
+            p.style.left = (cx + (Math.random() - 0.5) * 64) + 'px';
+            p.style.top = (cy + (Math.random() - 0.5) * 24) + 'px';
+            const size = 10 + Math.floor(Math.random() * 12);
+            p.style.width = size + 'px'; p.style.height = size + 'px';
+            p.style.pointerEvents = 'none';
+            p.style.zIndex = 1000;
+            world.appendChild(p);
+            let life = 60 + Math.floor(Math.random() * 40);
+            let vx = (Math.random() - 0.5) * 10;
+            let vy = -8 - Math.random() * 8;
+            function anim() {
+                life--;
+                vy += 0.45; // gravity
+                p.style.top = (p.offsetTop + vy) + 'px';
+                p.style.left = (p.offsetLeft + vx) + 'px';
+                p.style.opacity = Math.max(0, life / 80);
+                if (life > 0) requestAnimationFrame(anim);
+                else p.remove();
             }
-            // if we were dashing and collided with a wall, stop the dash early
-            if (isDashing) collidedDuringDash = true;
+            anim();
         }
+        // respawn after short delay
+        setTimeout(() => {
+
+
+    
+
+            isDead = false;
+            startLevel(selectedLevel);
+        }, 900);
     }
 
-    if (collidedDuringDash) {
-        isDashing = false;
-        dashFramesLeft = 0;
-        // keep dash cooldown as-is
+    // Resolve wall collisions using movement direction to prefer horizontal fixes
+    let collidedDuringDash = false;
+
+const pw = 128, ph = 128;
+
+for (const w of walls) {
+    const wl = w.offsetLeft;
+    const wt = w.offsetTop;
+    const ww = w.offsetWidth;
+    const wh = w.offsetHeight;
+
+    const wr = wl + ww;
+    const wb = wt + wh;
+
+    // AABB overlap check
+    const pxL = x;
+    const pxR = x + pw;
+    const pyT = y;
+    const pyB = y + ph;
+
+    const overlapX = Math.min(pxR, wr) - Math.max(pxL, wl);
+    const overlapY = Math.min(pyB, wb) - Math.max(pyT, wt);
+
+    if (overlapX > 0 && overlapY > 0) {
+
+        const pxC = x + pw / 2;
+        const pyC = y + ph / 2;
+        const wxC = wl + ww / 2;
+        const wyC = wt + wh / 2;
+
+        if (overlapX < overlapY) {
+            // WALL — resolve horizontally only
+            if (pxC < wxC) {
+                x -= overlapX;
+            } else {
+                x += overlapX;
+            }
+            velocityX = 0;
+        } else {
+            // FLOOR or CEILING — resolve vertically
+            if (pyC < wyC) {
+                // landed on top
+                y -= overlapY;
+                velocityY = 0;
+                onGround = true;
+            } else {
+                // hit underside
+                y += overlapY;
+                velocityY = 0;
+            }
+        }
+
+        if (isDashing) collidedDuringDash = true;
     }
+}
+
+if (collidedDuringDash) {
+    isDashing = false;
+    dashFramesLeft = 0;
+    // dash cooldown unchanged
+}
+
 
     // Wall sticking: only if holding Z, not dashing, not on ground, and touching the vertical side
     let touchingWall = false;
@@ -453,12 +984,32 @@ function update() {
     }
 
     if (touchingWall) {
-        isWallSticking = true;
-        // cancel vertical velocity so player holds to the wall
-        velocityY = 0;
+        // increment hold counter and toggle blink/auto-slide when threshold reached
+        wallHoldFrames++;
+        if (wallHoldFrames > WALL_HOLD_TO_SLIDE) {
+            // enter overheated state: cannot stick until touching ground
+            if (!wallOverheated) wallOverheated = true;
+            player.classList.add('blink-red');
+            isAutoSlideFromHold = true;
+        } else {
+            player.classList.remove('blink-red');
+        }
+        // only allow actual sticking if the wall is not overheated and cooldown expired
+        if (!wallOverheated && stickCooldown === 0) {
+            isWallSticking = true;
+            if (wallHoldFrames <= WALL_HOLD_TO_SLIDE) velocityY = 0;
+        } else {
+            isWallSticking = false;
+        }
     } else {
         // release stick when Z released or not adjacent
         if (!keys['KeyZ']) isWallSticking = false;
+        // clear hold/blink/auto-slide state when not touching the wall, unless overheated
+        if (!wallOverheated) {
+            wallHoldFrames = 0;
+            isAutoSlideFromHold = false;
+            player.classList.remove('blink-red');
+        }
     }
 
     // detect being near a wall (but not stuck) so we can slide and allow wall-jump even if not explicitly sticking
@@ -523,14 +1074,33 @@ function update() {
                 wallJumpFramesLeft = WALL_JUMP_FRAMES;
                 facing = (nearWallSide === 'left') ? -1 : 1;
             }
+            // immediate small pull-away so the jump visibly moves you away from the wall
+            const PULL_AWAY = 15;
+            if (isWallSticking) {
+                x += (wallStickSide === 'left') ? -PULL_AWAY : PULL_AWAY;
+            } else if (nearWall) {
+                x += (nearWallSide === 'left') ? -PULL_AWAY : PULL_AWAY;
+            }
+            // if this was a jump from a near-wall (not holding Z) or we're overheated (red),
+            // ignore input toward the wall until the jump reaches its peak so the launch pulls away.
+            if (nearWall || wallOverheated) {
+                ignoreTowardsWallInput = true;
+                jumpIgnoreWallSide = isWallSticking ? wallStickSide : nearWallSide;
+            }
             // prevent immediate re-stick for a short time so the player is launched away naturally
             stickCooldown = STICK_COOLDOWN_FRAMES;
             // after wall-jump, ensure player is not stuck; require re-hold Z and correct side to stick again
-            isWallSticking = false;
+                isWallSticking = false;
+                // clear hold/blink state so player won't immediately re-enter auto-slide
+                wallHoldFrames = 0;
+                isAutoSlideFromHold = false;
+                player.classList.remove('blink-red');
             // reduce camera snap by holding slow lerp for a few frames
             camHoldFrames = 18;
         }
     }
+
+
 
     // apply smooth horizontal motion from a wall-jump over several frames
     if (wallJumpFramesLeft > 0 && !isDashing) {
@@ -538,6 +1108,12 @@ function update() {
         wallJumpFramesLeft--;
         // optional decay
         wallJumpVelX *= 0.9;
+    }
+
+    // stop ignoring toward-wall input once the jump reaches its peak (vertical velocity >= 0)
+    if (ignoreTowardsWallInput && velocityY >= 0) {
+        ignoreTowardsWallInput = false;
+        jumpIgnoreWallSide = null;
     }
 
     // choose sprite: wall grab and dash sprites override others while active
@@ -556,9 +1132,9 @@ function update() {
         sprite = SPRITES.running;
     }
 
-    // clamp to world bounds
+    // clamp horizontal position, allow vertical position to fall through the bottom
     x = clamp(x, 0, worldWidth - 128);
-    y = clamp(y, 0, worldHeight - 128);
+    y = Math.max(y, 0);
 
     // set player position in world coords
     player.style.left = x + "px";
@@ -576,7 +1152,12 @@ function update() {
     // camera: smooth follow to reduce snapping on wall-jump
     const gameWidth = game.clientWidth;
     const gameHeight = game.clientHeight;
-    const targetCamX = clamp(x + 64 - gameWidth / 2, 0, worldWidth - gameWidth);
+ let targetCamX = clamp(
+    x + 64 - gameWidth / 2,
+    0,
+    Math.min(worldWidth - gameWidth, CAMERA_RIGHT_LOCK_X)
+);
+
     const targetCamY = clamp(y + 64 - gameHeight / 2, 0, worldHeight - gameHeight);
     const lerp = camHoldFrames > 0 ? CAM_LERP_SLOW : CAM_LERP;
     camX += (targetCamX - camX) * lerp;
@@ -596,6 +1177,60 @@ function update() {
     wasMoving = moving;
     wasJumpPressed = keys["Space"];
     wasDashPressed = keys['KeyX'];
+
+    // Hint triggers: when player reaches certain X positions, show contextual help
+    try {
+        if (hintTriggers.jump.x !== null && !hintTriggers.jump.shown && x >= hintTriggers.jump.x - 60) {
+            showHint.worldX = hintTriggers.jump.x;
+            showHint.worldY = hintTriggers.jump.y || (getPlatformTop() - 80);
+            showHint('Use the arrow keys to move and spacebar to jump');
+            hintTriggers.jump.shown = true;
+        }
+        if (hintTriggers.wall.x !== null && !hintTriggers.wall.shown && x >= hintTriggers.wall.x - 60) {
+            showHint.worldX = hintTriggers.wall.x;
+            showHint.worldY = hintTriggers.wall.y || (getPlatformTop() - 100);
+            showHint('Use Z to climb');
+            hintTriggers.wall.shown = true;
+        }
+        if (hintTriggers.dash.x !== null && !hintTriggers.dash.shown && x >= hintTriggers.dash.x - 60) {
+            showHint.worldX = hintTriggers.dash.x;
+            showHint.worldY = hintTriggers.dash.y || (getPlatformTop() - 80);
+            showHint('Press X to dash');
+            hintTriggers.dash.shown = true;
+        }
+    } catch (e) {}
+
+    // orient platform pieces: if there is no block directly above a piece, mark it exposed so its top faces upward
+    (function orientPlatformPieces(){
+        const pieces = Array.from(document.querySelectorAll('.platform-piece'));
+        const wallsList = Array.from(document.querySelectorAll('.wall'));
+        for (const p of pieces) {
+            const pTop = p.offsetTop;
+            const pLeft = p.offsetLeft, pRight = pLeft + p.offsetWidth;
+            let hasAbove = false;
+            // check other platform pieces
+            for (const q of pieces) {
+                if (q === p) continue;
+                const qBottom = q.offsetTop + q.offsetHeight;
+                const qLeft = q.offsetLeft, qRight = qLeft + q.offsetWidth;
+                if (qRight > pLeft && qLeft < pRight) {
+                    // horizontally overlapping
+                    if (qBottom <= pTop + 4 && qBottom >= pTop - 8) { hasAbove = true; break; }
+                }
+            }
+            if (!hasAbove) {
+                // check walls
+                for (const w of wallsList) {
+                    const wBottom = w.offsetTop + w.offsetHeight;
+                    const wLeft = w.offsetLeft, wRight = wLeft + w.offsetWidth;
+                    if (wLeft >= pLeft && wRight <= pRight) {
+                        if (wBottom <= pTop + 4 && wBottom >= pTop - 8) { hasAbove = true; break; }
+                    }
+                }
+            }
+            if (!hasAbove) p.classList.add('exposed'); else p.classList.remove('exposed');
+        }
+    })();
 
     requestAnimationFrame(update);
 }
