@@ -37,14 +37,16 @@
         background-size: cover;
         transform-origin: center;
     }
-
-      #trigger {
+    #flag {
         position: absolute;
-        width: 256px;
-        height: 256px;
+        width: 128px;
+        height: 128px;
         background-image: url("flag.gif");
+        background-size: contain;
+        background-repeat: no-repeat;
         pointer-events: none;
-  }
+    }
+
 
     #platform {
         position: absolute;
@@ -237,6 +239,7 @@
 <div id="game">
     <div id="world">
         <div id="player"></div>
+        <div id="flag"></div>
         <div id="platform">
             <div class="floor-top"></div>
             <div class="floor-main"></div>
@@ -268,6 +271,7 @@
 const game = document.getElementById("game");
 const world = document.getElementById("world");
 const player = document.getElementById("player");
+const flag = document.getElementById("flag");
 const platform = document.getElementById("platform");
 const walls = Array.from(document.querySelectorAll('.wall'));
 
@@ -370,19 +374,16 @@ function showHint(msg, duration = HINT_DURATION) {
 }
 
 // create a world-anchored hint element so text appears at world coordinates
-const worldHint = document.createElement('div');
-worldHint.id = 'world-hint';
-worldHint.className = 'world-hint';
-world.appendChild(worldHint);
+
 
 const gravity = 0.6;
 const speed = 5;
 const jumpPower = -12;
 
 // dash tuning (frames)
-const DASH_FRAMES = 18; // longer so easing-out lasts longer
-const DASH_COOLDOWN_FRAMES = 36; // cooldown after a dash
-const DASH_SPEED = 36; // pixels per frame during dash (initially faster)
+const DASH_FRAMES = 26; // longer so easing-out lasts longer
+const DASH_COOLDOWN_FRAMES = 1; // cooldown after a dash
+const DASH_SPEED = 26; // pixels per frame during dash (initially faster)
 
 // wall/jump/slide tuning
 const WALL_JUMP_HORZ = 64; // horizontal push when doing a wall-jump while stuck
@@ -528,6 +529,7 @@ function startLevel(level) {
     clearLevelPieces();
     const platTop = getPlatformTop();
     if (level === 1) {
+        game.style.background = "url('forest.jpg') center / cover no-repeat";
         // easy tutorial: start platform, gap, wall to climb, then ground walk
         const leftPlat = createPlatformPiece(80 + GLOBAL_SHIFT, 220, 40);
         const rightPlat = createPlatformPiece(460 + GLOBAL_SHIFT, 180, 40);
@@ -539,6 +541,12 @@ function startLevel(level) {
         x = leftPlat.offsetLeft + 20;
         y = leftPlat.offsetTop - 128;
         // add a walkway with a dash-only gap at the far end
+
+        const worldHint = document.createElement('div');
+worldHint.id = 'world-hint';
+worldHint.className = 'world-hint';
+world.appendChild(worldHint);
+
         (function createDashGapWalkway(){
             const WALK_H = 40;
             const LEFT_LEN = 520; // length of the walkable top connected to the wall
@@ -621,8 +629,7 @@ function startLevel(level) {
             y = spawnY;
         })();
     } else if (level === 2) {
-        // Level 2: add a small starting platform where the player spawns
-        // create a short platform near the default spawn X and place the player on it
+            game.style.background = "url('cave.jpg') center / cover no-repeat";
         const spawnLeft = 100 + GLOBAL_SHIFT + (level-1) * 40;
         const startPlat = createPlatformPiece(spawnLeft - 40, 220, 40);
         // place the platform a bit above the bottom so it's visible as a staging area
@@ -645,13 +652,37 @@ function startLevel(level) {
         wall.style.left = (800 + GLOBAL_SHIFT + (level-1)*160) + 'px';
         wall.style.top = (platTop - wall.offsetHeight) + 'px';
     }
+if (level === 1) {
+    const platforms = document.querySelectorAll('.platform-piece');
+    const lastPlat = platforms[platforms.length - 1]; // landing platform after dash
 
-    // start the loop only once — subsequent level selects should not spawn extra loops
+    flag.style.left = 3000 + "px";
+    flag.style.top = 530 + "px";
+}
+if (level === 2) {
+    const platforms = document.querySelectorAll('.platform-piece');
+    const lastPlat = platforms[platforms.length - 1]; // landing platform after dash
+
+    flag.style.left = 3000 + "px";
+    flag.style.top = 530 + "px";
+}
+if (level === 3) {
+    const platforms = document.querySelectorAll('.platform-piece');
+    const lastPlat = platforms[platforms.length - 1]; // landing platform after dash
+
+    flag.style.left = 3000 + "px";
+    flag.style.top = 530 + "px";
+}
+
+
+
+
+
     if (!gameStarted) { gameStarted = true; update(); }
 }
 
 
-const flag = document.getElementById('flag');
+
 
 function isColliding(a, b) {
   const rectA = a.getBoundingClientRect();
@@ -664,21 +695,6 @@ function isColliding(a, b) {
   );
 }
 
-function nextLevel() {
-
-    if(isColliding(player, flag)) {
-    selectedLevel++;       // increment the level
-    startLevel(selectedLevel); // start the next level
-}
-
-}
-
-
-
-
-
-
-
 
 
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
@@ -689,9 +705,11 @@ function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
 
 function update() {
     // frame start: preserve previous position for collision-side checks
+
+
     prevX = x;
     prevY = y;
-
+    onGround = false;
     // update cooldowns
     if (dashCooldownLeft > 0) dashCooldownLeft--;
     if (stickCooldown > 0) stickCooldown--;
@@ -816,19 +834,42 @@ function update() {
     const overlapY = Math.min(y + 128, wtBottom) - Math.max(y, wt);
 
     // falling onto top → allow landing
-    if (prevBottom <= wt && velocityY >= 0) {
-        y = wt - 128;
-        velocityY = 0;
-        onGround = true;
-        continue;
-    }
+if (prevBottom <= wt && velocityY >= 0) {
+    y = wt - 128;
+    velocityY = 0;
+    onGround = true;
+if (onGround && isDashing) {
+    isDashing = false;
+    dashFramesLeft = 0;
+    dashVelX = 0;
+    dashVelY = 0;
+}
+    // STOP DASH ON FLOOR / PLATFORM
+    isDashing = false;
+    dashFramesLeft = 0;
+    dashVelX = 0;
+    dashVelY = 0;
+
+    continue;
+}
+
 
     // otherwise resolve like a wall
-    if (overlapX < overlapY) {
-        if (x < wl) x -= overlapX;
-        else x += overlapX;
-        velocityX = 0;
-    } else {
+if (overlapX < overlapY) {
+    if (x < wl) x -= overlapX;
+    else x += overlapX;
+
+    // STOP DASH ON PLATFORM SIDE HIT
+    if (isDashing) {
+        isDashing = false;
+        dashFramesLeft = 0;
+        dashVelX = 0;
+        dashVelY = 0;
+    }
+
+    velocityX = 0;
+}
+else {
         if (y < wt) y -= overlapY;
         else y += overlapY;
         velocityY = 0;
@@ -836,19 +877,26 @@ function update() {
 }
 
 
-    if (!wasOnGround && onGround) {
-        spawnParticles();
-        // reset dash availability when touching the ground
-        canDash = true;
-        // clear wall-overheat state so the player can stick again after landing
-        wallOverheated = false;
-        wallHoldFrames = 0;
-        isAutoSlideFromHold = false;
-        player.classList.remove('blink-red');
-        // also clear any input-ignore set by wall-jumps
-        ignoreTowardsWallInput = false;
-        jumpIgnoreWallSide = null;
-    }
+if (wasOnGround && onGround) {
+    spawnParticles();
+    canDash = true;
+    wallOverheated = false;
+    wallHoldFrames = 0;
+    isAutoSlideFromHold = false;
+    player.classList.remove('blink-red');
+    ignoreTowardsWallInput = false;
+    jumpIgnoreWallSide = null;
+}
+
+if (onGround) {
+    isWallSticking = false;
+    isAutoSlideFromHold = false;
+    wallHoldFrames = 0;
+    slideParticleTimer = 0;
+    player.classList.remove('blink-red');
+}
+
+
 
     // death when falling off the bottom of the world
     if (!isDead && y > worldHeight + 200) {
@@ -932,12 +980,23 @@ for (const w of walls) {
             velocityX = 0;
         } else {
             // FLOOR or CEILING — resolve vertically
-            if (pyC < wyC) {
-                // landed on top
-                y -= overlapY;
-                velocityY = 0;
-                onGround = true;
-            } else {
+if (pyC < wyC) {
+    y -= overlapY;
+    velocityY = 0;
+    onGround = true;
+if (onGround && isDashing) {
+    isDashing = false;
+    dashFramesLeft = 0;
+    dashVelX = 0;
+    dashVelY = 0;
+}
+    // STOP DASH ON FLOOR
+    isDashing = false;
+    dashFramesLeft = 0;
+    dashVelX = 0;
+    dashVelY = 0;
+}
+ else {
                 // hit underside
                 y += overlapY;
                 velocityY = 0;
@@ -955,33 +1014,52 @@ if (collidedDuringDash) {
 }
 
 
-    // Wall sticking: only if holding Z, not dashing, not on ground, and touching the vertical side
-    let touchingWall = false;
-    wallStickSide = null;
-    if (!isDashing && keys['KeyZ'] && !onGround) {
-        for (const w of walls) {
-            const wl = w.offsetLeft, wt = w.offsetTop, ww = w.offsetWidth, wh = w.offsetHeight;
-            const wr = wl + ww, wb = wt + wh;
-            // vertical overlap required
-            if (y + ph > wt && y < wb) {
-                // check if player is adjacent to left or right side (small tolerance)
-                const tol = 4;
-                // only allow sticking if stickCooldown expired
-                if (stickCooldown === 0 && Math.abs((x + pw) - wl) <= tol) {
-                    touchingWall = true;
-                    wallStickSide = 'left';
-                    x = wl - pw; // snap flush to wall side
-                    break;
-                }
-                if (stickCooldown === 0 && Math.abs(x - wr) <= tol) {
-                    touchingWall = true;
-                    wallStickSide = 'right';
-                    x = wr; // snap flush
-                    break;
-                }
-            }
+let touchingWall = false;
+wallStickSide = null;
+
+if (!isDashing && keys['KeyZ'] && !onGround && stickCooldown === 0 && !wallOverheated) {
+
+    const checkStick = (wl, wt, ww, wh) => {
+        const wr = wl + ww;
+        const wb = wt + wh;
+
+        // must overlap vertically
+        if (y + ph <= wt || y >= wb) return false;
+
+        // left face
+        if (Math.abs((x + pw) - wl) <= 6) {
+            touchingWall = true;
+            wallStickSide = 'left';
+            x = wl - pw;
+            return true;
+        }
+
+        // right face
+        if (Math.abs(x - wr) <= 6) {
+            touchingWall = true;
+            wallStickSide = 'right';
+            x = wr;
+            return true;
+        }
+
+        return false;
+    };
+
+    // check walls
+    for (const w of walls) {
+        if (checkStick(w.offsetLeft, w.offsetTop, w.offsetWidth, w.offsetHeight)) break;
+    }
+
+    // check platform sides ONLY if no wall stick yet
+    if (!touchingWall) {
+        for (const p of document.querySelectorAll('.platform-piece')) {
+            if (checkStick(p.offsetLeft, p.offsetTop, p.offsetWidth, p.offsetHeight)) break;
         }
     }
+}
+
+
+
 
     if (touchingWall) {
         // increment hold counter and toggle blink/auto-slide when threshold reached
@@ -991,9 +1069,7 @@ if (collidedDuringDash) {
             if (!wallOverheated) wallOverheated = true;
             player.classList.add('blink-red');
             isAutoSlideFromHold = true;
-        } else {
-            player.classList.remove('blink-red');
-        }
+        } 
         // only allow actual sticking if the wall is not overheated and cooldown expired
         if (!wallOverheated && stickCooldown === 0) {
             isWallSticking = true;
@@ -1032,8 +1108,35 @@ if (collidedDuringDash) {
         }
     }
 
+for (const p of document.querySelectorAll('.platform-piece')) {
+    const wl = p.offsetLeft;
+    const wt = p.offsetTop;
+    const ww = p.offsetWidth;
+    const wh = p.offsetHeight;
+
+    const wr = wl + ww;
+    const wb = wt + wh;
+
+    if (y + ph <= wt || y >= wb) continue;
+
+    if (Math.abs((x + pw) - wl) <= NEAR_TOL && keys['ArrowRight']) {
+        nearWall = true;
+        nearWallSide = 'left';
+        break;
+    }
+
+    if (Math.abs(x - wr) <= NEAR_TOL && keys['ArrowLeft']) {
+        nearWall = true;
+        nearWallSide = 'right';
+        break;
+    }
+}
+
+
+
+
     // sliding effect when next to a wall but not sticking
-    if (nearWall && !isWallSticking && !onGround) {
+   if (!onGround && nearWall && !isWallSticking) {
         // cap downward speed so sliding is slower than freefall
         if (velocityY > SLIDE_CAP) velocityY = SLIDE_CAP;
         // spawn particles occasionally while sliding
@@ -1094,7 +1197,6 @@ if (collidedDuringDash) {
                 // clear hold/blink state so player won't immediately re-enter auto-slide
                 wallHoldFrames = 0;
                 isAutoSlideFromHold = false;
-                player.classList.remove('blink-red');
             // reduce camera snap by holding slow lerp for a few frames
             camHoldFrames = 18;
         }
@@ -1169,9 +1271,15 @@ if (collidedDuringDash) {
     const crouchingNow = keys["ArrowDown"] && onGround;
     const standing = onGround && !moving && !crouchingNow;
     // if we just started standing (landed and stopped), recharge dash
-    if (standing && !wasStanding) {
-        canDash = true;
-    }
+if (!wasOnGround && onGround) {
+    canDash = true;
+    isWallSticking = false;      // ← REQUIRED
+    isAutoSlideFromHold = false;
+    wallHoldFrames = 0;
+    wallOverheated = false;
+    slideParticleTimer = 0;
+    player.classList.remove('blink-red');
+}
 
     wasStanding = standing;
     wasMoving = moving;
@@ -1232,11 +1340,14 @@ if (collidedDuringDash) {
         }
     })();
 
+    if (isColliding(player, flag)) {
+    selectedLevel++;
+    startLevel(selectedLevel);
+}
+
     requestAnimationFrame(update);
 }
 </script>
 
 </body>
 </html>
-
-
