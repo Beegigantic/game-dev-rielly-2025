@@ -1,24 +1,57 @@
- <h1 align="center">t2a22 json</h1>
+   <h1 align="center">t2a22 json</h1>
 
-  <script>
-    async function fetchData(url){
-      const response = await fetch(url);
-      const data =  await response.json();
-      console.log(data);
+    <script>
+        async function fetchData(url) {
+            try {
+                // Use a proxy for APIs known to have CORS issues
+                let fetchUrl = url;
+                if (url.includes("random-d.uk") || url.includes("foodish-api") || url.includes("coffee.alexflipnote")) {
+                    fetchUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+                }
 
-      const myJson = JSON.stringify(data, null, 2);
-      document.getElementById('myDiv1').innerHTML = `<pre>${myJson}</pre>`;
+                const response = await fetch(fetchUrl);
+                let data = await response.json();
+                
+                // If using allorigins proxy, the real data is inside .contents as a string
+                if (fetchUrl.includes("allorigins")) {
+                    data = JSON.parse(data.contents);
+                }
 
-      document.getElementById('myDiv1').innerHTML += `<img src="${data.image}" alt="Random Image" style="max-width: 100%; height: auto;">`;
-    
-   }
+                console.log(data);
 
-  </script>
+                const myJson = JSON.stringify(data, null, 2);
+                document.getElementById('myDiv1').innerHTML = `<pre>${myJson}</pre>`;
 
+                let imageUrl = "";
 
-  <select id="mySelect" size="1" onchange="fetchData(this.value)">
-    <option ></option>   
-    <option value="https://randomfox.ca/floof/">randomfox</option>
-  </select><br><br>
+                if (url.includes("dog.ceo")) {
+                    imageUrl = data.message;
+                } else if (url.includes("thecatapi")) {
+                    imageUrl = data[0].url;
+                } else if (url.includes("random-d.uk")) {
+                    imageUrl = data.url;
+                } else if (url.includes("foodish-api")) {
+                    imageUrl = data.image;
+                } else if (url.includes("coffee.alexflipnote.dev")) {
+                    imageUrl = data.file;
+                }
 
-  <div id="myDiv1">...</div>
+                if (imageUrl) {
+                    document.getElementById('myDiv1').innerHTML += `<img src="${imageUrl}" alt="Random Image" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">`;
+                }
+            } catch (error) {
+                document.getElementById('myDiv1').innerHTML = "Error fetching data: " + error + "<br><small>Note: Some APIs may be down or blocked by CORS.</small>";
+            }
+        }
+    </script>
+
+    <select id="mySelect" size="1" onchange="fetchData(this.value)">
+        <option value="">Select an API</option>   
+        <option value="https://dog.ceo/api/breeds/image/random">Random Dog</option>
+        <option value="https://api.thecatapi.com/v1/images/search">Random Cat</option>
+        <option value="https://random-d.uk/api/v2/random">Random Duck</option>
+        <option value="https://foodish-api.com/api/">Random Food</option>
+        <option value="https://coffee.alexflipnote.dev/random.json">Random Coffee</option>
+    </select><br><br>
+
+    <div id="myDiv1">...</div>
