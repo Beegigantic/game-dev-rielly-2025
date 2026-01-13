@@ -1,16 +1,18 @@
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>Async Evolution: Same Task, Different Methods</title>
-</head>
 <body>
 
-    <h1 align="center">🦊 t2a23d-asyn-await-history-fred.html</h1>
+    <h1 align="center">t2a23-asyn-await-history-rielly</h1>
     <p>Run the demos below to see how **Legacy AJAX (XHR)**, **Promises (.then)**, and **Async/Await** all perform the same simple task: fetching JSON data from an API. The output box will show the fetched data.</p>
 
     <div style="margin-bottom: 20px;">
-        <label for="api-url" style="font-weight: bold;">API URL:</label>
-        <textarea id="api-url" rows="2" cols="120" style="margin-bottom: 10px;">https://randomfox.ca/floof/</textarea><br>
+        <label for="api-select" style="font-weight: bold;">Select API:</label>
+        <select id="api-select" style="margin-bottom: 10px; padding: 5px;">
+            <option value="https://dog.ceo/api/breeds/image/random">Random Dog</option>
+            <option value="https://api.thecatapi.com/v1/images/search">Random Cat</option>
+            <option value="https://random-d.uk/api/v2/random">Random Duck</option>
+            <option value="https://foodish-api.com/api/">Random Food</option>
+            <option value="https://coffee.alexflipnote.dev/random.json">Random Coffee</option>
+        </select><br>
         
         <button onclick="fetchAjaxXhr()">1. Run Legacy XHR (AJAX)</button>
         <button onclick="fetchPromiseChain()">2. Run Promises (.then)</button>
@@ -26,46 +28,69 @@
         const output = document.getElementById('results');
 
         function getApiUrl() {
-            return document.getElementById('api-url').value;
+            return document.getElementById('api-select').value;
+        }
+
+        function getProxiedUrl(url) {
+            if (url.includes("random-d.uk") || url.includes("foodish-api") || url.includes("coffee.alexflipnote")) {
+                return "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+            }
+            return url;
         }
 
         function log(message) {
             output.innerHTML += `${message}\n`;
         }
         
-        function logData(data, method) {
-             const myJson = JSON.stringify(data, null, 2);
-             log(`\n--- ${method} Result ---`);
-             // Use <pre> to display formatted JSON nicely
-             output.innerHTML += `<pre>${myJson}</pre>`;
+        function logData(data, method, originalUrl) {
+            // Handle proxy wrappers
+            let finalData = data;
+            if (data.contents && typeof data.contents === 'string') {
+                try {
+                    finalData = JSON.parse(data.contents);
+                } catch(e) {}
+            }
+
+            const myJson = JSON.stringify(finalData, null, 2);
+            log(`\n--- ${method} Result ---`);
+            output.innerHTML += `<pre>${myJson}</pre>`;
+
+            // Extract image based on API type
+            let imageUrl = "";
+            if (originalUrl.includes("dog.ceo")) imageUrl = finalData.message;
+            else if (originalUrl.includes("thecatapi")) imageUrl = finalData[0].url;
+            else if (originalUrl.includes("random-d.uk")) imageUrl = finalData.url;
+            else if (originalUrl.includes("foodish-api")) imageUrl = finalData.image;
+            else if (originalUrl.includes("coffee.alexflipnote.dev")) imageUrl = finalData.file;
+
+            if (imageUrl) {
+                output.innerHTML += `<img src="${imageUrl}" style="max-width: 300px; display: block; margin-top: 10px; border: 1px solid #ddd;">`;
+            }
         }
 
         // --- 1. LEGACY AJAX (XMLHttpRequest) ---
         function fetchAjaxXhr() {
             log("\n--- XMLHttpRequest (XHR) Started ---");
             const url = getApiUrl();
+            const proxyUrl = getProxiedUrl(url);
             const xhr = new XMLHttpRequest();
 
-            // STEP 1: Define the callback function to run on load
             xhr.onload = function() {
                 if (xhr.status === 200) {
                     try {
-                        // The raw response text needs to be parsed manually
                         const data = JSON.parse(xhr.responseText);
-                        logData(data, "XHR (AJAX)");
+                        logData(data, "XHR (AJAX)", url);
                         log("✅ XHR Complete: Requires manual JSON parsing and callback handling.\n------------------------------------------------------\n");
                     } catch (e) {
                         log('❌ XHR Error: JSON parsing failed.');
                     }
                 } else {
-                    log(`❌ XHR Error: HTTP status ${xhr.status} for ${url}`);
+                    log(`❌ XHR Error: HTTP status ${xhr.status}`);
                 }
             };
 
             xhr.onerror = () => log("❌ XHR Error: A network error occurred.");
-
-            // STEP 2: Configure and send the request
-            xhr.open('GET', url, true);
+            xhr.open('GET', proxyUrl, true);
             xhr.send();
             log(`...XHR request sent to ${url}`);
         }
@@ -74,20 +99,17 @@
         function fetchPromiseChain() {
             log("\n--- Promises (.then) Started ---");
             const url = getApiUrl();
+            const proxyUrl = getProxiedUrl(url);
             
-            // STEP 1: fetch returns a Promise
-            fetch(url)
-                // STEP 2: Check for HTTP errors and return the response body as JSON (which is a new Promise)
+            fetch(proxyUrl)
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
                     return response.json(); 
                 })
-                // STEP 3: Handle the resolved JSON data
                 .then(data => {
-                    logData(data, "Promises (.then)");
+                    logData(data, "Promises (.then)", url);
                     log("✅ Promises Complete: Solves nesting with **.then() chaining**.\n------------------------------------------------------\n");
                 })
-                // STEP 4: Handle any errors in the chain
                 .catch(error => {
                     log(`❌ Promise Error: ${error.message}`);
                 });
@@ -99,29 +121,21 @@
         async function fetchAsyncAwait() {
             log("\n--- Async/Await Started ---");
             const url = getApiUrl();
+            const proxyUrl = getProxiedUrl(url);
             
             try {
-                // STEP 1: Use 'await' to pause and wait for the response object
-                const response = await fetch(url);
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
                 
-                // Check for HTTP errors
-                if (!response.ok) {
-                    throw new Error(`HTTP Error! Status: ${response.status}`);
-                }
-                
-                // STEP 2: Use 'await' to pause and wait for the JSON parsing
                 const data = await response.json();
-                
-                logData(data, "Async/Await");
+                logData(data, "Async/Await", url);
                 log("✅ Async/Await Complete: Reads like synchronous code using familiar **try/catch**.\n------------------------------------------------------\n");
 
             } catch (error) {
-                // Handle all errors (network, HTTP, or JSON parsing)
                 log(`❌ Async/Await Error: ${error.message}`);
             }
             log(`...Async/Await fetch initiated to ${url}`);
         }
-
     </script>
 
 </body>
