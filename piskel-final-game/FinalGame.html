@@ -1468,13 +1468,13 @@ if (selectedLevel === 1) {
         if (hintTriggers.wall.x !== null && !hintTriggers.wall.shown && x >= hintTriggers.wall.x - 60) {
             showHint.worldX = hintTriggers.wall.x;
             showHint.worldY = hintTriggers.wall.y || (getPlatformTop() - 100);
-            showHint('Hold Z to climb');
+            showHint('Hold Z and jump to climb');
             hintTriggers.wall.shown = true;
         }
         if (hintTriggers.dash.x !== null && !hintTriggers.dash.shown && x >= hintTriggers.dash.x - 60) {
             showHint.worldX = hintTriggers.dash.x;
             showHint.worldY = hintTriggers.dash.y || (getPlatformTop() - 80);
-            showHint('Press X to dash');
+            showHint('Press X to dash in any direction');
             hintTriggers.dash.shown = true;
         }
     } catch (e) {}
@@ -1559,4 +1559,5 @@ if (finishPhase !== 0) {
 
 </body>
 </html>
+
 
