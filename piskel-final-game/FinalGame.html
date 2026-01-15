@@ -306,10 +306,50 @@ let facing = 1;
 let wasMoving = false;
 let wasJumpPressed = false;
 let wasStanding = false;
+let finishPhase = 0; // 0 = none, 1 = fade in, 2 = hold, 3 = fade out
+let finishTimer = 0;
+let finishOverlay = null;
+let finishCamOffsetY = 0;
+const FINISH_CAM_PAN = 260; // pixels to pan upward
 
 
 const CAMERA_RIGHT_LOCK_X = 2100;
 
+const LEVEL3_FINISH_ZONE = {
+    x: 2626,
+    y: -1470,
+    w: 50,
+    h: 50
+};
+let gameFinished = false;
+const coordReadout = document.createElement('div');
+coordReadout.style.position = 'fixed';
+coordReadout.style.right = '12px';
+coordReadout.style.bottom = '12px';
+coordReadout.style.padding = '6px 10px';
+coordReadout.style.background = 'rgba(0,0,0,0.7)';
+coordReadout.style.color = '#0f0';
+coordReadout.style.fontFamily = 'monospace';
+coordReadout.style.fontSize = '14px';
+coordReadout.style.zIndex = '3000';
+document.body.appendChild(coordReadout);
+
+game.addEventListener('mousemove', e => {
+    const rect = game.getBoundingClientRect();
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+
+    const worldX = Math.round(screenX + camX);
+    const worldY = Math.round(screenY + camY);
+
+    coordReadout.textContent = `X:${worldX}  Y:${worldY}`;
+});
+document.addEventListener('keydown', e => {
+    if (e.code === 'KeyP') {
+        x = parseInt(coordReadout.textContent.split(/\D+/)[1]);
+        y = parseInt(coordReadout.textContent.split(/\D+/)[2]);
+    }
+});
 
 
 // dash/wall states
@@ -353,6 +393,12 @@ const hintTriggers = {
     wall: { x: null, shown: false },
     dash: { x: null, shown: false }
 };
+function aabbOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+    return ax < bx + bw &&
+           ax + aw > bx &&
+           ay < by + bh &&
+           ay + ah > by;
+}
 
 function showHint(msg, duration = HINT_DURATION) {
     // prefer a world-anchored hint if available
@@ -469,15 +515,40 @@ let gameStarted = false;
         const pieces = Array.from(document.querySelectorAll('.platform-piece'));
         for (const p of pieces) p.remove();
     }
-function createPlatformPiece(left, width, height) {
+
+function clearHints() {
+    if (hintBox) hintBox.style.opacity = '0';
+
+    const worldHint = document.getElementById('world-hint');
+    if (worldHint) worldHint.remove();
+
+    hintTriggers.jump.x = null;
+    hintTriggers.wall.x = null;
+    hintTriggers.dash.x = null;
+
+    hintTriggers.jump.shown = true;
+    hintTriggers.wall.shown = true;
+    hintTriggers.dash.shown = true;
+}
+function createPlatformPiece(left, width, height, opts = {}) {
+    const { floating = false } = opts;
+
     const p = document.createElement('div');
     p.className = 'platform-piece';
     p.style.left = left + 'px';
     p.style.width = width + 'px';
 
     const platTop = getPlatformTop();
-    p.style.top = (platTop - height) + 'px';
-    p.style.height = '1000px';   // must be tall to allow vertical texture
+
+    if (floating) {
+        // true floating platform: exact height only
+        p.style.top = (platTop - height) + 'px';
+        p.style.height = height + 'px';
+    } else {
+        // ground-connected platform: extend downward
+        p.style.top = (platTop - height) + 'px';
+        p.style.height = '1000px';
+    }
 
     const topFace = document.createElement('div');
     topFace.className = 'top-face';
@@ -486,13 +557,14 @@ function createPlatformPiece(left, width, height) {
     topFace.appendChild(topInner);
     p.appendChild(topFace);
 
-    const body = document.createElement('div');   // ← THIS IS THE FIX
+    const body = document.createElement('div');
     body.className = 'body';
     p.appendChild(body);
 
     world.appendChild(p);
     return p;
 }
+
     function getPlatformTop() {
         // If the platform element is visible, use its offsetTop; otherwise use world bottom minus 64
         try {
@@ -500,6 +572,16 @@ function createPlatformPiece(left, width, height) {
         } catch (e) {}
         return worldHeight - 64; // default platform top when floor removed
     }
+    function buildPlatforms(layout) {
+    for (const p of layout) {
+        createPlatformPiece(
+            p.x + GLOBAL_SHIFT,
+            p.w,
+            p.h
+        );
+    }
+}
+
 function startLevel(level) {
     selectedLevel = level;
     const wall = document.getElementById('wall1');
@@ -628,29 +710,46 @@ world.appendChild(worldHint);
             x = spawnX;
             y = spawnY;
         })();
-    } else if (level === 2) {
-            game.style.background = "url('cave.jpg') center / cover no-repeat";
-        const spawnLeft = 100 + GLOBAL_SHIFT + (level-1) * 40;
-        const startPlat = createPlatformPiece(spawnLeft - 40, 220, 40);
-        // place the platform a bit above the bottom so it's visible as a staging area
-        startPlat.style.top = (worldHeight - 260) + 'px';
-        // place the player on top of this platform
-        x = startPlat.offsetLeft + 20;
-        y = startPlat.offsetTop - 128;
-        // place wall further right of the starting platform and align its top
-        const wallLeft = startPlat.offsetLeft + startPlat.offsetWidth + 200;
-        wall.style.left = wallLeft + 'px';
-        wall.style.top = (startPlat.offsetTop - wall.offsetHeight) + 'px';
-        // reset hint triggers for level 2
-        hintTriggers.jump.x = startPlat.offsetLeft + startPlat.offsetWidth - 40;
-        hintTriggers.jump.y = startPlat.offsetTop - 80;
-        hintTriggers.wall.x = wall.offsetLeft - 40;
-        hintTriggers.wall.y = wall.offsetTop - 100;
-        hintTriggers.jump.shown = hintTriggers.wall.shown = hintTriggers.dash.shown = false;
-    } else if (level === 3) {
-        // default: single big floor and wall as before; place wall with top alignment
-        wall.style.left = (800 + GLOBAL_SHIFT + (level-1)*160) + 'px';
-        wall.style.top = (platTop - wall.offsetHeight) + 'px';
+    }
+else if (level === 2) {
+     clearHints();
+    game.style.background = "url('cave.jpg') center / cover no-repeat";
+
+    // x, w, h, { floating: true }
+
+    createPlatformPiece(200 + GLOBAL_SHIFT, 260, 40);       
+    createPlatformPiece(640 + GLOBAL_SHIFT, 500, 400); 
+    createPlatformPiece(1350 + GLOBAL_SHIFT, 100, 1140); 
+    createPlatformPiece(1650 + GLOBAL_SHIFT, 100, 440);  
+    createPlatformPiece(1850 + GLOBAL_SHIFT, 100, 40);  
+    createPlatformPiece(2050 + GLOBAL_SHIFT, 100, 40);  
+    createPlatformPiece(2550 + GLOBAL_SHIFT, 100, 40);  
+
+
+    x = 220 + GLOBAL_SHIFT;
+    y = getPlatformTop() - 40 - 128;
+}
+else if (level === 3) {
+     clearHints();
+    game.style.background = "url('mountaintop.png') center / cover no-repeat";
+
+    // x, w, h, { floating: true }
+
+    createPlatformPiece(5 + GLOBAL_SHIFT, 1000, 40);       
+    createPlatformPiece(640 + GLOBAL_SHIFT, 300, 500); 
+    createPlatformPiece(840 + GLOBAL_SHIFT, 300, 940); 
+            createPlatformPiece(840 + GLOBAL_SHIFT, 300, 440); 
+    createPlatformPiece(1250 + GLOBAL_SHIFT, 300, 860);  
+            createPlatformPiece(950 + GLOBAL_SHIFT, 300, 860);
+    createPlatformPiece(1440 + GLOBAL_SHIFT, 700, 2200);  
+            createPlatformPiece(1440 + GLOBAL_SHIFT, 700, 1200);
+    createPlatformPiece(2140 + GLOBAL_SHIFT, 300, 2350); 
+    createPlatformPiece(2440 + GLOBAL_SHIFT, 700, 2200); 
+    createPlatformPiece(3200 + GLOBAL_SHIFT, 100, 3200); 
+
+
+    x = 220 + GLOBAL_SHIFT;
+    y = getPlatformTop() - 40 - 128;
     }
 if (level === 1) {
     const platforms = document.querySelectorAll('.platform-piece');
@@ -663,14 +762,14 @@ if (level === 2) {
     const platforms = document.querySelectorAll('.platform-piece');
     const lastPlat = platforms[platforms.length - 1]; // landing platform after dash
 
-    flag.style.left = 3000 + "px";
-    flag.style.top = 530 + "px";
+    flag.style.left = 2850 + "px";
+    flag.style.top = 800 + "px";
 }
 if (level === 3) {
     const platforms = document.querySelectorAll('.platform-piece');
     const lastPlat = platforms[platforms.length - 1]; // landing platform after dash
 
-    flag.style.left = 3000 + "px";
+    flag.style.left = 30000000 + "px";
     flag.style.top = 530 + "px";
 }
 
@@ -695,6 +794,37 @@ function isColliding(a, b) {
   );
 }
 
+function finishGame() {
+    finishPhase = 1;
+    finishTimer = 0;
+
+    finishOverlay = document.createElement('div');
+    finishOverlay.style.position = 'fixed';
+    finishOverlay.style.inset = '0';
+finishOverlay.style.background = 'rgba(0,0,0,0.65)';
+    finishOverlay.style.opacity = '0';
+    finishOverlay.style.pointerEvents = 'none';
+    finishOverlay.style.transition = 'opacity 2.5s ease-in-out';
+    finishOverlay.style.zIndex = '2000';
+
+    const text = document.createElement('div');
+    text.textContent = 'SUMMIT REACHED';
+    text.style.position = 'absolute';
+    text.style.top = '50%';
+    text.style.left = '50%';
+    text.style.transform = 'translate(-50%, -50%)';
+    text.style.color = 'white';
+    text.style.fontSize = '48px';
+    text.style.fontFamily = 'system-ui, Arial, sans-serif';
+
+    finishOverlay.appendChild(text);
+    document.body.appendChild(finishOverlay);
+
+    requestAnimationFrame(() => {
+        finishOverlay.style.opacity = '1';
+    });
+}
+
 
 
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
@@ -710,6 +840,17 @@ function update() {
     prevX = x;
     prevY = y;
     onGround = false;
+    if (finishPhase !== 0) {
+    // allow gravity but block input & abilities
+    keys['ArrowLeft'] = false;
+    keys['ArrowRight'] = false;
+    keys['ArrowUp'] = false;
+    keys['ArrowDown'] = false;
+    keys['Space'] = false;
+    keys['KeyX'] = false;
+    keys['KeyZ'] = false;
+}
+
     // update cooldowns
     if (dashCooldownLeft > 0) dashCooldownLeft--;
     if (stickCooldown > 0) stickCooldown--;
@@ -1236,7 +1377,10 @@ for (const p of document.querySelectorAll('.platform-piece')) {
 
     // clamp horizontal position, allow vertical position to fall through the bottom
     x = clamp(x, 0, worldWidth - 128);
+    if (selectedLevel !== 3) {
     y = Math.max(y, 0);
+}
+
 
     // set player position in world coords
     player.style.left = x + "px";
@@ -1259,11 +1403,37 @@ for (const p of document.querySelectorAll('.platform-piece')) {
     0,
     Math.min(worldWidth - gameWidth, CAMERA_RIGHT_LOCK_X)
 );
+if (
+    selectedLevel === 3 &&
+    !gameFinished &&
+    aabbOverlap(
+        x, y, 128, 128,
+        LEVEL3_FINISH_ZONE.x,
+        LEVEL3_FINISH_ZONE.y,
+        LEVEL3_FINISH_ZONE.w,
+        LEVEL3_FINISH_ZONE.h
+    )
+) {
+    gameFinished = true;
+    finishGame();
+}
 
-    const targetCamY = clamp(y + 64 - gameHeight / 2, 0, worldHeight - gameHeight);
-    const lerp = camHoldFrames > 0 ? CAM_LERP_SLOW : CAM_LERP;
-    camX += (targetCamX - camX) * lerp;
-    camY += (targetCamY - camY) * lerp;
+
+ let targetCamY;
+if (selectedLevel === 3) {
+    targetCamY = y + 64 - gameHeight / 2;
+} else {
+    targetCamY = clamp(
+        y + 64 - gameHeight / 2,
+        0,
+        worldHeight - gameHeight
+    );
+}
+const finalTargetCamY = targetCamY + finishCamOffsetY;
+
+const lerp = camHoldFrames > 0 ? CAM_LERP_SLOW : CAM_LERP;
+camX += (targetCamX - camX) * lerp;
+camY += (finalTargetCamY - camY) * lerp;
     if (camHoldFrames > 0) camHoldFrames--;
     world.style.transform = `translate(${-Math.round(camX)}px, ${-Math.round(camY)}px)`;
 
@@ -1287,6 +1457,7 @@ if (!wasOnGround && onGround) {
     wasDashPressed = keys['KeyX'];
 
     // Hint triggers: when player reaches certain X positions, show contextual help
+if (selectedLevel === 1) {
     try {
         if (hintTriggers.jump.x !== null && !hintTriggers.jump.shown && x >= hintTriggers.jump.x - 60) {
             showHint.worldX = hintTriggers.jump.x;
@@ -1307,6 +1478,7 @@ if (!wasOnGround && onGround) {
             hintTriggers.dash.shown = true;
         }
     } catch (e) {}
+}
 
     // orient platform pieces: if there is no block directly above a piece, mark it exposed so its top faces upward
     (function orientPlatformPieces(){
@@ -1344,6 +1516,42 @@ if (!wasOnGround && onGround) {
     selectedLevel++;
     startLevel(selectedLevel);
 }
+if (finishPhase !== 0) {
+    finishTimer++;
+
+    // fade in + pan up
+    if (finishPhase === 1) {
+        const t = Math.min(finishTimer / 150, 1);
+        finishCamOffsetY = -FINISH_CAM_PAN * t;
+        if (finishTimer > 150) {
+            finishPhase = 2;
+            finishTimer = 0;
+        }
+    }
+
+    // hold at top
+    else if (finishPhase === 2) {
+        finishCamOffsetY = -FINISH_CAM_PAN;
+        if (finishTimer > 120) {
+            finishPhase = 3;
+            finishTimer = 0;
+            finishOverlay.style.opacity = '0';
+        }
+    }
+
+    // fade out + pan back down
+    else if (finishPhase === 3) {
+        const t = Math.min(finishTimer / 150, 1);
+        finishCamOffsetY = -FINISH_CAM_PAN * (1 - t);
+        if (finishTimer > 150) {
+            finishPhase = 0;
+            finishCamOffsetY = 0;
+            finishOverlay.remove();
+            finishOverlay = null;
+        }
+    }
+}
+
 
     requestAnimationFrame(update);
 }
